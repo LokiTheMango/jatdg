@@ -1,13 +1,15 @@
 package main
 
 import (
-	"github.com/LokiTheMango/jatdg/graphics"
 	"time"
+
+	"github.com/LokiTheMango/jatdg/enums"
+	"github.com/LokiTheMango/jatdg/graphics"
 )
 
 func main() {
 	//TODO: INIT GAME
-	graphics.InitWindowLoop("GAME",160*4, 144*4, 160, 144, func(sharedWindow *graphics.Window) {
+	graphics.InitWindowLoop("GAME", 160*4, 160*4, 160, 160, func(sharedWindow *graphics.Window) {
 		startGame(sharedWindow)
 	})
 
@@ -15,43 +17,68 @@ func main() {
 
 func startGame(window *graphics.Window) {
 
+	tilemap, size := graphics.NewTileMap("C:\\Projects\\Go\\src\\github.com\\LokiTheMango\\jatdg\\resources\\tiles.jpg")
+	tiles := createTileArray(tilemap.PixelArray)
+	framebuffer := parseFrameBuffer(tiles, size)
 	lastVBlankTime := time.Now()
-
+	spent := time.Now().Sub(lastVBlankTime)
+	spent++
+	window.Mutex.Lock()
+	copy(window.Pixel, framebuffer)
+	window.RequestDraw()
+	window.Mutex.Unlock()
 	for {
-		window.Mutex.Lock()
-		framebuffer := make([]byte, 160*140*4)
-		for i:=0; i < len(framebuffer); i++ {
-			if(i%3==0){
-				framebuffer[i] = 0;
-			} else {
-				framebuffer[i] = 255;
+		/*
+			spent := time.Now().Sub(lastVBlankTime)
+			toWait := 17*time.Millisecond - spent
+			if toWait > time.Duration(0) {
+				<-time.NewTimer(toWait).C
 			}
-		}
-		copy(window.Pixel, framebuffer)
-		window.RequestDraw()
-		window.Mutex.Unlock()
-		spent := time.Now().Sub(lastVBlankTime)
-		toWait := 17*time.Millisecond - spent
-		if toWait > time.Duration(0) {
-			<-time.NewTimer(toWait).C
-		}
 
-		/*window.Mutex.Lock()
-		newInput := game.Input {
-			Keys: game.Keys {
-				Sel:  window.CharIsDown('t'), Start: window.CharIsDown('y'),
-				Up:   window.CharIsDown('w'), Down:  window.CharIsDown('s'),
-				Left: window.CharIsDown('a'), Right: window.CharIsDown('d'),
-				A:    window.CharIsDown('k'), B:     window.CharIsDown('j'),
-			},
+			window.Mutex.Lock()
+			newInput := game.Input {
+				Keys: game.Keys {
+					Sel:  window.CharIsDown('t'), Start: window.CharIsDown('y'),
+					Up:   window.CharIsDown('w'), Down:  window.CharIsDown('s'),
+					Left: window.CharIsDown('a'), Right: window.CharIsDown('d'),
+					A:    window.CharIsDown('k'), B:     window.CharIsDown('j'),
+				},
+			}
+			numDown := 'x'
+			for r := '0'; r <= '9'; r++ {
+				if window.CharIsDown(r) {
+					numDown = r
+					break
+				}
+			}
+			window.Mutex.Unlock()*/
+	}
+}
+
+func createTileArray(arr []byte) []graphics.Tile {
+	tiles := make([]graphics.Tile, 10*10)
+	for i := 0; i < 10; i++ {
+		for j := 0; j < 10; j++ {
+			tiles[i+j] = graphics.NewTile(arr, enums.VOID, i, j)
 		}
-		numDown := 'x'
-		for r := '0'; r <= '9'; r++ {
-			if window.CharIsDown(r) {
-				numDown = r
-				break
+	}
+	return tiles
+}
+
+func parseFrameBuffer(tiles []graphics.Tile, size int) []byte {
+	framebuffer := make([]byte, size)
+	for i := 0; i < 10; i++ {
+		for j := 0; j < 10; j++ {
+			arr := tiles[i+j].GetPixelArray()
+			for k := 0; k < 16; k++ {
+				copy(framebuffer[i*k*64+j*10:i*k*64+(j+1)*10], arr[k*64:(k+1)*64])
 			}
 		}
-		window.Mutex.Unlock()*/
 	}
+	testarr := tiles[0].GetPixelArray()
+	for x := 0; x < 16; x++ {
+		val := x * 640
+		copy(framebuffer[val:val+64], testarr[x*64:(x+1)*64])
+	}
+	return framebuffer
 }
