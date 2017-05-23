@@ -15,13 +15,13 @@ func NewTile(pixelArray []byte, tileType enums.TileType, posX int, posY int) Til
 	var tilePosY int
 	switch tileType {
 	case enums.VOID:
-		tilePosX = 0
-		tilePosY = 0
+		tilePosX = 1
+		tilePosY = 1
 	}
 	for i := 0; i < enums.HEIGHT_TILE; i++ {
-		start := i*enums.WIDTH_TILE + tilePosY*enums.WIDTH
+		start := i*enums.WIDTH_TILE + tilePosY*enums.WIDTH_TILE
 		end := start + enums.WIDTH_TILE
-		startPix := i*enums.WIDTH + tilePosX
+		startPix := i*enums.WIDTH*4 + tilePosX
 		endPix := startPix + enums.WIDTH_TILE
 
 		copy(pixel[start:end], pixelArray[startPix:endPix])

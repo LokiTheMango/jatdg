@@ -71,14 +71,9 @@ func parseFrameBuffer(tiles []graphics.Tile, size int) []byte {
 		for j := 0; j < 10; j++ {
 			arr := tiles[i+j].GetPixelArray()
 			for k := 0; k < 16; k++ {
-				copy(framebuffer[i*k*64+j*10:i*k*64+(j+1)*10], arr[k*64:(k+1)*64])
+				copy(framebuffer[(k+i*16)*640+j*64:(k+i*16)*640+(j+1)*64], arr[k*64:(k+1)*64])
 			}
 		}
-	}
-	testarr := tiles[0].GetPixelArray()
-	for x := 0; x < 16; x++ {
-		val := x * 640
-		copy(framebuffer[val:val+64], testarr[x*64:(x+1)*64])
 	}
 	return framebuffer
 }

@@ -3,6 +3,7 @@ package graphics
 import (
 	"image"
 	"image/draw"
+	//import jpeg
 	_ "image/jpeg"
 	"os"
 )
