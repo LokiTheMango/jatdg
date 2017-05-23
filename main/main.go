@@ -1,6 +1,7 @@
 package main
 
 import (
+	"math/rand"
 	"time"
 
 	"github.com/LokiTheMango/jatdg/enums"
@@ -13,6 +14,11 @@ func main() {
 		startGame(sharedWindow)
 	})
 
+}
+
+func randInt(min int, max int) int {
+	rand.Seed(time.Now().UTC().UnixNano())
+	return min + rand.Intn(max-min)
 }
 
 func startGame(window *graphics.Window) {
@@ -59,7 +65,8 @@ func createTileArray(arr []byte) []graphics.Tile {
 	tiles := make([]graphics.Tile, 10*10)
 	for i := 0; i < 10; i++ {
 		for j := 0; j < 10; j++ {
-			tiles[i+j] = graphics.NewTile(arr, enums.VOID, i, j)
+			nextTile := randInt(0, 4)
+			tiles[i+j] = graphics.NewTile(arr, enums.TileType(nextTile), i, j)
 		}
 	}
 	return tiles
