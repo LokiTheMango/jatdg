@@ -9,7 +9,7 @@ import (
 	"os"
 )
 
-type TileMap struct {
+type SpriteSheet struct {
 	width      int
 	height     int
 	filePath   string
@@ -17,8 +17,8 @@ type TileMap struct {
 	encoding   string
 }
 
-//Constructor for TileMap
-func NewTileMap(filePath string) (TileMap, int) {
+//Constructor for SpriteSheet
+func NewSpriteSheet(filePath string) (SpriteSheet, int) {
 	reader, err := os.Open(filePath)
 	if err != nil {
 		panic(err)
@@ -28,7 +28,7 @@ func NewTileMap(filePath string) (TileMap, int) {
 	rect := img.Bounds()
 	rgba := image.NewRGBA(rect)
 	draw.Draw(rgba, rect, img, rect.Min, draw.Src)
-	return TileMap{
+	return SpriteSheet{
 		width:      (rect.Max.X - rect.Min.X),
 		height:     (rect.Max.Y - rect.Min.Y),
 		filePath:   filePath,

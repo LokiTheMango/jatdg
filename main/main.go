@@ -29,8 +29,8 @@ func main() {
 
 func startGame(window *graphics.Window, gameI *game.Game, filePath string) {
 	//FOR RELEASE : gameI.CreateTileMap(filePath + "/resources/tiles.jpg")
-	gameI.CreateTileMap("C:\\Projects\\go\\src\\github.com\\LokiTheMango\\jatdg\\resources\\tiles.jpg")
-	gameI.CreateTileArray()
+	gameI.CreateSpriteSheet("C:\\Projects\\go\\src\\github.com\\LokiTheMango\\jatdg\\resources\\tiles.jpg")
+	gameI.CreateSpriteArray()
 	gameI.ParseFrameBuffer()
 	lastVBlankTime := time.Now()
 

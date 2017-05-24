@@ -4,44 +4,44 @@ import (
 	"github.com/LokiTheMango/jatdg/enums"
 )
 
-type Tile struct {
+type Sprite struct {
 	tileType   enums.TileType
 	posX       int
 	posY       int
 	pixelArray []byte
 }
 
-func NewTile(pixelArray []byte, tileType enums.TileType, posX int, posY int) Tile {
+func NewSprite(pixelArray []byte, tileType enums.TileType, posX int, posY int) Sprite {
 	pixel := make([]byte, enums.WIDTH_TILE*enums.HEIGHT_TILE)
-	var tilePosX int
-	var tilePosY int
+	var SpritePosX int
+	var SpritePosY int
 	switch tileType {
 	case enums.VOID:
-		tilePosX = 0
-		tilePosY = 0
+		SpritePosX = 0
+		SpritePosY = 0
 	case enums.BULLET:
-		tilePosX = 1
-		tilePosY = 0
+		SpritePosX = 1
+		SpritePosY = 0
 	case enums.TOWER:
-		tilePosX = 2
-		tilePosY = 0
+		SpritePosX = 2
+		SpritePosY = 0
 	case enums.ENEMY:
-		tilePosX = 3
-		tilePosY = 0
+		SpritePosX = 3
+		SpritePosY = 0
 	}
 	for i := 0; i < enums.HEIGHT_TILE; i++ {
 		start := i * enums.WIDTH_TILE
 		end := start + enums.WIDTH_TILE
 
-		offsetY := tilePosY * 4 * enums.HEIGHT_TILE * enums.WIDTH
-		offsetX := tilePosX * enums.WIDTH_TILE
+		offsetY := SpritePosY * 4 * enums.HEIGHT_TILE * enums.WIDTH
+		offsetX := SpritePosX * enums.WIDTH_TILE
 
 		startPix := i*enums.WIDTH*4 + offsetY + offsetX
 		endPix := startPix + enums.WIDTH_TILE
 
 		copy(pixel[start:end], pixelArray[startPix:endPix])
 	}
-	return Tile{
+	return Sprite{
 		tileType:   tileType,
 		posX:       posX,
 		posY:       posY,
@@ -50,6 +50,6 @@ func NewTile(pixelArray []byte, tileType enums.TileType, posX int, posY int) Til
 }
 
 //Getter for PixelArray
-func (tile *Tile) GetPixelArray() []byte {
-	return tile.pixelArray
+func (Sprite *Sprite) GetPixelArray() []byte {
+	return Sprite.pixelArray
 }

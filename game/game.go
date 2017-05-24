@@ -10,15 +10,15 @@ import (
 
 // Game Object
 type Game struct {
-	gameMap       Map
-	input         Input
-	DrawRequested bool
-	tiles         []render.Tile
-	tileMap       render.TileMap
-	tileMapSize   int
-	PixelArray    []byte
-	xOffset       int
-	yOffset       int
+	gameMap         Map
+	input           Input
+	DrawRequested   bool
+	Sprites         []render.Sprite
+	SpriteSheet     render.SpriteSheet
+	SpriteSheetSize int
+	PixelArray      []byte
+	xOffset         int
+	yOffset         int
 }
 
 //Constructor
@@ -28,8 +28,8 @@ func New() *Game {
 		gameMap:       Map{},
 		input:         Input{},
 		DrawRequested: false,
-		tiles:         make([]render.Tile, 0),
-		tileMap:       render.TileMap{},
+		Sprites:       make([]render.Sprite, 0),
+		SpriteSheet:   render.SpriteSheet{},
 		xOffset:       0,
 		yOffset:       0,
 	}
@@ -49,52 +49,55 @@ func (game *Game) UpdateInput(newInput Input) {
 	game.input = newInput
 }
 
-func (game *Game) SetTiles(tiles []render.Tile) {
-	game.tiles = tiles
+func (game *Game) SetSprites(Sprites []render.Sprite) {
+	game.Sprites = Sprites
 }
-func (game *Game) GetTiles() []render.Tile {
-	return game.tiles
+func (game *Game) GetSprites() []render.Sprite {
+	return game.Sprites
 }
 
-func (game *Game) CreateTileMap(filePath string) {
-	tileMap, size := render.NewTileMap(filePath)
-	game.tileMap = tileMap
-	game.tileMapSize = size
+func (game *Game) CreateSpriteSheet(filePath string) {
+	spriteSheet, size := render.NewSpriteSheet(filePath)
+	game.SpriteSheet = spriteSheet
+	game.SpriteSheetSize = size
 }
-func (game *Game) GetTileMap() render.TileMap {
-	return game.tileMap
+func (game *Game) GetSpriteMap() render.SpriteSheet {
+	return game.SpriteSheet
 }
 
 func (game *Game) GetPixelArray() []byte {
-	return game.tileMap.PixelArray
+	return game.SpriteSheet.PixelArray
 }
 
-func (game *Game) CreateTileArray() {
-	game.tiles = make([]render.Tile, 10*10)
+func (game *Game) CreateSpriteArray() {
+	game.Sprites = make([]render.Sprite, 10*10)
 	for i := 0; i < 10; i++ {
 		for j := 0; j < 10; j++ {
-			nextTile := randInt(0, 4)
-			game.tiles[i+j] = render.NewTile(game.tileMap.PixelArray, enums.TileType(nextTile), i, j)
+			nextSprite := randInt(0, 4)
+			game.Sprites[i+j] = render.NewSprite(game.SpriteSheet.PixelArray, enums.TileType(nextSprite), i, j)
 		}
 	}
 }
 
 func (game *Game) ParseFrameBuffer() {
-	framebuffer := make([]byte, game.tileMapSize)
+	framebuffer := make([]byte, game.SpriteSheetSize)
 	for y := 0; y < enums.HEIGHT; y++ {
 		yy := y + game.yOffset
-		/*if yy < 0 || yy >= enums.HEIGHT {
-			break
-		}*/
+		if yy < 0 || yy >= enums.HEIGHT {
+			continue
+		}
 		for x := 0; x < enums.WIDTH*4; x++ {
 			xx := x + (game.xOffset << 2)
-			/*if xx < 0 || xx >= enums.WIDTH*4 {
-				break
-			}*/
-			tileIndex := ((yy >> 5) & 9) + ((xx >> 7) & 9)
-			tileArr := game.tiles[tileIndex].GetPixelArray()
-			index := (xx % 128) + (yy%32)*128
-			framebuffer[x+y*enums.WIDTH*4] = tileArr[index]
+			if xx < 0 || xx >= enums.WIDTH*4 {
+				continue
+			}
+			SpriteIndex := ((yy >> 5) & 9) + ((xx >> 7) & 9)
+			SpriteArr := game.Sprites[SpriteIndex].GetPixelArray()
+			index := ((xx & 127) % 128) + ((yy&31)%32)*128
+			if index < 0 {
+				index *= -1
+			}
+			framebuffer[x+y*enums.WIDTH*4] = SpriteArr[index]
 		}
 	}
 	game.PixelArray = framebuffer
