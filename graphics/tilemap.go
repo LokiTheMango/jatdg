@@ -3,6 +3,7 @@ package graphics
 import (
 	"image"
 	"image/draw"
+
 	//import jpeg
 	_ "image/jpeg"
 	"os"
@@ -16,6 +17,7 @@ type TileMap struct {
 	encoding   string
 }
 
+//Constructor for TileMap
 func NewTileMap(filePath string) (TileMap, int) {
 	reader, err := os.Open(filePath)
 	if err != nil {

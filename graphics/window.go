@@ -1,36 +1,39 @@
 package graphics
 
 import (
-	"sync"
+	"fmt"
 	"image"
 	"image/color"
+	"sync"
+	"time"
 
 	"golang.org/x/exp/shiny/driver"
 	"golang.org/x/exp/shiny/screen"
 	"golang.org/x/image/math/f64"
-	"golang.org/x/mobile/event/lifecycle"
 	"golang.org/x/mobile/event/key"
+	"golang.org/x/mobile/event/lifecycle"
 	"golang.org/x/mobile/event/paint"
 	"golang.org/x/mobile/event/size"
 )
 
 type Window struct {
-	Width  		int
-	Height 		int
-	Mutex  		sync.Mutex
+	Width  int
+	Height int
+	Mutex  sync.Mutex
 
-	Pixel  		[]byte
+	Pixel []byte
 
-	keyCodeArray	[256]bool
-	keyCodeMap	map[key.Code]bool
-	keyCharArray	[256]bool
-	keyCharMap	map[rune]bool
+	keyCodeArray [256]bool
+	keyCodeMap   map[key.Code]bool
+	keyCharArray [256]bool
+	keyCharMap   map[rune]bool
 
-	eventQueue	screen.EventDeque
-	drawRequested	bool
+	eventQueue    screen.EventDeque
+	drawRequested bool
+	StopDrawing   bool
 }
 
-type drawRequest struct {}
+type drawRequest struct{}
 
 func (w *Window) CharIsDown(c rune) bool {
 	if c < 256 {
@@ -48,7 +51,7 @@ func (w *Window) KeycodeIsDown(c key.Code) bool {
 
 func (w *Window) updateKeyboardState(e key.Event) {
 	setVal := e.Direction == key.DirPress
-	if setVal ||e.Direction == key.DirRelease {
+	if setVal || e.Direction == key.DirRelease {
 		if e.Code < 256 {
 			w.keyCodeArray[byte(e.Code)] = setVal
 		}
@@ -70,7 +73,10 @@ func (w *Window) RequestDraw() {
 
 // create window and start event loop
 func InitWindowLoop(windowTitle string, windowWidth int, windowHeight int, frameWidth int, frameHeight int, updateLoop func(*Window)) {
-	driver.Main(func (s screen.Screen) {
+	driver.Main(func(s screen.Screen) {
+
+		lastTime := time.Now()
+		updateTime := time.Duration(0)
 
 		win, err := s.NewWindow(&screen.NewWindowOptions{windowWidth, windowHeight, windowTitle})
 		if err != nil {
@@ -88,12 +94,13 @@ func InitWindowLoop(windowTitle string, windowWidth int, windowHeight int, frame
 		}
 
 		window := Window{
-			Width: frameWidth,
-			Height: frameHeight,
-			Pixel: make([]byte, 4*frameWidth*frameHeight),
-			eventQueue: win,
-			keyCodeMap: map[key.Code]bool{},
-			keyCharMap: map[rune]bool{},
+			Width:       frameWidth,
+			Height:      frameHeight,
+			Pixel:       make([]byte, 4*frameWidth*frameHeight),
+			eventQueue:  win,
+			keyCodeMap:  map[key.Code]bool{},
+			keyCharMap:  map[rune]bool{},
+			StopDrawing: false,
 		}
 
 		go updateLoop(&window)
@@ -108,6 +115,12 @@ func InitWindowLoop(windowTitle string, windowWidth int, windowHeight int, frame
 			case lifecycle.Event:
 				if e.To == lifecycle.StageDead {
 					return
+				}
+				if e.To == lifecycle.StageFocused {
+					window.StopDrawing = false
+				}
+				if e.To == lifecycle.StageVisible {
+					window.StopDrawing = true
 				}
 
 			case key.Event:
@@ -131,22 +144,22 @@ func InitWindowLoop(windowTitle string, windowWidth int, windowHeight int, frame
 				publish = true
 			}
 
-			if publish {
+			if publish && !window.StopDrawing {
 				scaleFacX := float64(szRect.Max.X) / float64(tex.Bounds().Max.X)
 				scaleFacY := float64(szRect.Max.Y) / float64(tex.Bounds().Max.Y)
 				scaleFac := scaleFacX
-				if scaleFac < scaleFac {
+				if scaleFac < scaleFacY {
 					scaleFac = scaleFacY
 				}
 
 				scaleFac = float64(int(scaleFac))
 				newWidth := int(scaleFac * float64(tex.Bounds().Max.X))
 				centerX := float64(szRect.Max.X/2 - newWidth/2)
-				src2dst := f64.Aff3 {
+				src2dst := f64.Aff3{
 					float64(int(scaleFac)), 0, centerX,
 					0, float64(int(scaleFac)), 0,
 				}
-				identTrans := f64.Aff3 {
+				identTrans := f64.Aff3{
 					1, 0, 0,
 					0, 1, 0,
 				}
@@ -157,6 +170,13 @@ func InitWindowLoop(windowTitle string, windowWidth int, windowHeight int, frame
 				}
 				win.Draw(src2dst, tex, tex.Bounds(), screen.Src, nil)
 				win.Publish()
+				spent := time.Now().Sub(lastTime)
+				updateTime += spent
+				if updateTime > time.Second*2 {
+					fmt.Println("FPS:" + (time.Second / spent).String())
+					updateTime = time.Duration(0)
+				}
+				lastTime = time.Now()
 			}
 		}
 	})

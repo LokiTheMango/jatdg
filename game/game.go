@@ -1,13 +1,25 @@
 package game
 
-import "github.com/LokiTheMango/jatdg/graphics"
-
 // Game Object
 type Game struct {
-	window graphics.Window
+	gameMap       Map
+	input         Input
+	DrawRequested bool
 }
 
 //Constructor
 func New() *Game {
+	return &Game{
+		gameMap:       Map{},
+		input:         Input{},
+		DrawRequested: false,
+	}
+}
 
+func (game *Game) Update() {
+
+}
+
+func (game *Game) UpdateInput(newInput Input) {
+	game.input = newInput
 }

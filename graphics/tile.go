@@ -1,6 +1,8 @@
 package graphics
 
-import "github.com/LokiTheMango/jatdg/enums"
+import (
+	"github.com/LokiTheMango/jatdg/enums"
+)
 
 type Tile struct {
 	tileType   enums.TileType
@@ -47,6 +49,7 @@ func NewTile(pixelArray []byte, tileType enums.TileType, posX int, posY int) Til
 	}
 }
 
+//Getter for PixelArray
 func (tile *Tile) GetPixelArray() []byte {
 	return tile.pixelArray
 }
