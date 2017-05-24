@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/LokiTheMango/jatdg/enums"
+	"github.com/LokiTheMango/jatdg/game/entities"
 	"github.com/LokiTheMango/jatdg/game/render"
 )
 
@@ -13,7 +14,7 @@ type Game struct {
 	gameMap         Map
 	input           Input
 	DrawRequested   bool
-	Sprites         []render.Sprite
+	Tiles           []entities.Tile
 	SpriteSheet     render.SpriteSheet
 	SpriteSheetSize int
 	PixelArray      []byte
@@ -28,7 +29,7 @@ func New() *Game {
 		gameMap:       Map{},
 		input:         Input{},
 		DrawRequested: false,
-		Sprites:       make([]render.Sprite, 0),
+		Tiles:         make([]entities.Tile, 0),
 		SpriteSheet:   render.SpriteSheet{},
 		xOffset:       0,
 		yOffset:       0,
@@ -49,11 +50,11 @@ func (game *Game) UpdateInput(newInput Input) {
 	game.input = newInput
 }
 
-func (game *Game) SetSprites(Sprites []render.Sprite) {
-	game.Sprites = Sprites
+func (game *Game) SetTiles(tiles []entities.Tile) {
+	game.Tiles = tiles
 }
-func (game *Game) GetSprites() []render.Sprite {
-	return game.Sprites
+func (game *Game) GetTiles() []entities.Tile {
+	return game.Tiles
 }
 
 func (game *Game) CreateSpriteSheet(filePath string) {
@@ -69,12 +70,12 @@ func (game *Game) GetPixelArray() []byte {
 	return game.SpriteSheet.PixelArray
 }
 
-func (game *Game) CreateSpriteArray() {
-	game.Sprites = make([]render.Sprite, 10*10)
+func (game *Game) CreateTileArray() {
+	game.Tiles = make([]entities.Tile, 10*10)
 	for i := 0; i < 10; i++ {
 		for j := 0; j < 10; j++ {
 			nextSprite := randInt(0, 4)
-			game.Sprites[i+j] = render.NewSprite(game.SpriteSheet.PixelArray, enums.TileType(nextSprite), i, j)
+			game.Tiles[i+j] = entities.NewTile(game.SpriteSheet.PixelArray, enums.TileType(nextSprite), i, j)
 		}
 	}
 }
@@ -91,13 +92,13 @@ func (game *Game) ParseFrameBuffer() {
 			if xx < 0 || xx >= enums.WIDTH*4 {
 				continue
 			}
-			SpriteIndex := ((yy >> 5) & 9) + ((xx >> 7) & 9)
-			SpriteArr := game.Sprites[SpriteIndex].GetPixelArray()
+			tileIndex := ((yy >> 5) & 9) + ((xx >> 7) & 9)
+			tileArr := game.Tiles[tileIndex].GetPixelArray()
 			index := ((xx & 127) % 128) + ((yy&31)%32)*128
 			if index < 0 {
 				index *= -1
 			}
-			framebuffer[x+y*enums.WIDTH*4] = SpriteArr[index]
+			framebuffer[x+y*enums.WIDTH*4] = tileArr[index]
 		}
 	}
 	game.PixelArray = framebuffer

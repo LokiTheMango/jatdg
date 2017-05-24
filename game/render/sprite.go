@@ -8,7 +8,7 @@ type Sprite struct {
 	tileType   enums.TileType
 	posX       int
 	posY       int
-	pixelArray []byte
+	PixelArray []byte
 }
 
 func NewSprite(pixelArray []byte, tileType enums.TileType, posX int, posY int) Sprite {
@@ -45,11 +45,6 @@ func NewSprite(pixelArray []byte, tileType enums.TileType, posX int, posY int) S
 		tileType:   tileType,
 		posX:       posX,
 		posY:       posY,
-		pixelArray: pixel,
+		PixelArray: pixel,
 	}
-}
-
-//Getter for PixelArray
-func (Sprite *Sprite) GetPixelArray() []byte {
-	return Sprite.pixelArray
 }
