@@ -3,8 +3,8 @@ package enums
 type Dimension int
 
 const (
-	WIDTH       = 160
-	HEIGHT      = 160
-	WIDTH_TILE  = 64
-	HEIGHT_TILE = 16
+	WIDTH       = 320
+	HEIGHT      = 320
+	WIDTH_TILE  = 128
+	HEIGHT_TILE = 32
 )

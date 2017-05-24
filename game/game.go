@@ -16,6 +16,9 @@ type Game struct {
 	tiles         []render.Tile
 	tileMap       render.TileMap
 	tileMapSize   int
+	PixelArray    []byte
+	xOffset       int
+	yOffset       int
 }
 
 //Constructor
@@ -27,6 +30,8 @@ func New() *Game {
 		DrawRequested: false,
 		tiles:         make([]render.Tile, 0),
 		tileMap:       render.TileMap{},
+		xOffset:       0,
+		yOffset:       0,
 	}
 	return game
 }
@@ -36,7 +41,8 @@ func randInt(min int, max int) int {
 }
 
 func (game *Game) Update() {
-
+	game.CheckInputForOffsets()
+	game.ParseFrameBuffer()
 }
 
 func (game *Game) UpdateInput(newInput Input) {
@@ -73,15 +79,38 @@ func (game *Game) CreateTileArray() {
 	}
 }
 
-func (game *Game) ParseFrameBuffer() []byte {
+func (game *Game) ParseFrameBuffer() {
 	framebuffer := make([]byte, game.tileMapSize)
-	for i := 0; i < 10; i++ {
-		for j := 0; j < 10; j++ {
-			arr := game.tiles[i+j].GetPixelArray()
-			for k := 0; k < 16; k++ {
-				copy(framebuffer[(k+i*16)*640+j*64:(k+i*16)*640+(j+1)*64], arr[k*64:(k+1)*64])
-			}
+	for y := 0; y < enums.HEIGHT; y++ {
+		yy := y + game.yOffset
+		/*if yy < 0 || yy >= enums.HEIGHT {
+			break
+		}*/
+		for x := 0; x < enums.WIDTH*4; x++ {
+			xx := x + (game.xOffset << 2)
+			/*if xx < 0 || xx >= enums.WIDTH*4 {
+				break
+			}*/
+			tileIndex := ((yy >> 5) & 9) + ((xx >> 7) & 9)
+			tileArr := game.tiles[tileIndex].GetPixelArray()
+			index := (xx % 128) + (yy%32)*128
+			framebuffer[x+y*enums.WIDTH*4] = tileArr[index]
 		}
 	}
-	return framebuffer
+	game.PixelArray = framebuffer
+}
+
+func (game *Game) CheckInputForOffsets() {
+	if game.input.Up {
+		game.yOffset++
+	}
+	if game.input.Down {
+		game.yOffset--
+	}
+	if game.input.Left {
+		game.xOffset++
+	}
+	if game.input.Right {
+		game.xOffset--
+	}
 }

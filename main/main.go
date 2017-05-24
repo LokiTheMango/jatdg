@@ -1,6 +1,10 @@
 package main
 
 import (
+	"fmt"
+	"os"
+	"path"
+	"path/filepath"
 	"time"
 
 	"github.com/LokiTheMango/jatdg/game"
@@ -9,18 +13,25 @@ import (
 
 func main() {
 	//TODO: INIT GAME
+	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(dir)
+	exPath := path.Dir(dir)
+	fmt.Println(exPath)
 	game := game.New()
-	graphics.InitWindowLoop("GAME", 160*4, 160*4, 160, 160, func(sharedWindow *graphics.Window) {
-		startGame(sharedWindow, game)
+	graphics.InitWindowLoop("GAME", 160*4, 160*4, 320, 320, func(sharedWindow *graphics.Window) {
+		startGame(sharedWindow, game, exPath)
 	})
 
 }
 
-func startGame(window *graphics.Window, gameI *game.Game) {
-
-	gameI.CreateTileMap("C:\\Projects\\Go\\src\\github.com\\LokiTheMango\\jatdg\\resources\\tiles.jpg")
+func startGame(window *graphics.Window, gameI *game.Game, filePath string) {
+	//FOR RELEASE : gameI.CreateTileMap(filePath + "/resources/tiles.jpg")
+	gameI.CreateTileMap("C:\\Projects\\go\\src\\github.com\\LokiTheMango\\jatdg\\resources\\tiles.jpg")
 	gameI.CreateTileArray()
-	framebuffer := gameI.ParseFrameBuffer()
+	gameI.ParseFrameBuffer()
 	lastVBlankTime := time.Now()
 
 	for {
@@ -30,7 +41,7 @@ func startGame(window *graphics.Window, gameI *game.Game) {
 		}
 		if gameI.DrawRequested && !window.StopDrawing {
 			window.Mutex.Lock()
-			copy(window.Pixel, framebuffer)
+			copy(window.Pixel, gameI.PixelArray)
 			window.RequestDraw()
 			window.Mutex.Unlock()
 			spent := time.Now().Sub(lastVBlankTime)
