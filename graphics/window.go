@@ -7,6 +7,8 @@ import (
 	"sync"
 	"time"
 
+	"strconv"
+
 	"golang.org/x/exp/shiny/driver"
 	"golang.org/x/exp/shiny/screen"
 	"golang.org/x/image/math/f64"
@@ -74,7 +76,7 @@ func (w *Window) RequestDraw() {
 // create window and start event loop
 func InitWindowLoop(windowTitle string, windowWidth int, windowHeight int, frameWidth int, frameHeight int, updateLoop func(*Window)) {
 	driver.Main(func(s screen.Screen) {
-
+		frames := 0
 		lastTime := time.Now()
 		updateTime := time.Duration(0)
 
@@ -172,9 +174,11 @@ func InitWindowLoop(windowTitle string, windowWidth int, windowHeight int, frame
 				win.Publish()
 				spent := time.Now().Sub(lastTime)
 				updateTime += spent
-				if updateTime > time.Second*2 {
-					fmt.Println("FPS:" + (time.Second / spent).String())
+				frames++
+				if updateTime > time.Second*5 {
+					fmt.Println("FPS: " + strconv.Itoa(frames/5))
 					updateTime = time.Duration(0)
+					frames = 0
 				}
 				lastTime = time.Now()
 			}

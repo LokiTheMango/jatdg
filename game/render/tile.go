@@ -1,4 +1,4 @@
-package graphics
+package render
 
 import (
 	"github.com/LokiTheMango/jatdg/enums"
