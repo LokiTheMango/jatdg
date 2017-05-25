@@ -1,4 +1,4 @@
-package entities
+package tiles
 
 import (
 	"github.com/LokiTheMango/jatdg/enums"
@@ -55,8 +55,9 @@ func matchTileType(posX int, posY int, tileType enums.TileType, pixelArray []byt
 	return tile
 }
 
-func (tile *Tile) Render(x int, y int) {
-
+func GetVoidTile(posX int, posY int, pixelArray []byte) Tile {
+	tile := NewVoidTile(posX, posY, pixelArray).Tile
+	return tile
 }
 
 //Getter for PixelArray

@@ -1,93 +1,84 @@
 package game
 
 import (
-	"math/rand"
-	"time"
-
+	"github.com/LokiTheMango/jatdg/enums"
+	"github.com/LokiTheMango/jatdg/game/entities"
+	"github.com/LokiTheMango/jatdg/game/input"
+	"github.com/LokiTheMango/jatdg/game/level"
 	"github.com/LokiTheMango/jatdg/game/render"
 )
 
 // Game Object
 type Game struct {
-	level           Level
-	input           Input
-	DrawRequested   bool
-	SpriteSheet     render.SpriteSheet
-	SpriteSheetSize int
-	xOffset         int
-	yOffset         int
+	screen        Screen
+	level         level.Level
+	input         input.Keyboard
+	DrawRequested bool
+	camera        entities.Mob
 }
 
 //Constructor
 func New() *Game {
-	rand.Seed(time.Now().UTC().UnixNano())
 	game := &Game{
-		level:         Level{},
-		input:         Input{},
+		screen:        Screen{},
+		input:         input.Keyboard{},
 		DrawRequested: false,
-		SpriteSheet:   render.SpriteSheet{},
-		xOffset:       0,
-		yOffset:       0,
 	}
 	return game
 }
 
-func randInt(min int, max int) int {
-	return min + rand.Intn(max-min)
-}
-
 func (game *Game) Init(filePath string) {
-	game.createSpriteSheet(filePath)
-	game.createLevel()
-	game.initScreen()
-}
-
-func (game *Game) createSpriteSheet(filePath string) {
-	spriteSheet, size := render.NewSpriteSheet(filePath)
-	game.SpriteSheet = spriteSheet
-	game.SpriteSheetSize = size
-}
-
-func (game *Game) createLevel() {
-	game.level = NewLevel(game.SpriteSheet, 32, 32)
-}
-
-func (game *Game) initScreen() {
-	game.level.InitScreen(game.SpriteSheetSize)
+	game.screen = NewScreen(filePath)
+	game.level = level.NewLevel(game.screen.SpriteSheet, enums.LEVEL_WIDTH, enums.LEVEL_HEIGHT)
+	game.screen.SetLevel(game.level)
+	game.camera = entities.NewCamera()
 }
 
 func (game *Game) Update() {
-	game.checkInputForOffsets()
+	game.camera.Update()
+	game.moveObjects()
+	game.clearScreen()
 	game.render()
 }
 
 func (game *Game) render() {
-	game.level.RenderLevel(game.xOffset, game.yOffset)
+	x := game.camera.GetX()
+	y := game.camera.GetY()
+	game.screen.RenderLevel(x, y)
 }
 
-func (game *Game) checkInputForOffsets() {
+func (game *Game) clearScreen() {
+	game.screen.ClearScreen()
+}
+
+func (game *Game) moveObjects() {
+	xOffset := 0
+	yOffset := 0
 	if game.input.Up {
-		game.yOffset++
+		yOffset--
 	}
 	if game.input.Down {
-		game.yOffset--
+		yOffset++
 	}
 	if game.input.Left {
-		game.xOffset++
+		xOffset--
 	}
 	if game.input.Right {
-		game.xOffset--
+		xOffset++
+	}
+	if xOffset != 0 || yOffset != 0 {
+		game.camera.Move(xOffset, yOffset)
 	}
 }
 
-func (game *Game) UpdateInput(newInput Input) {
+func (game *Game) UpdateInput(newInput input.Keyboard) {
 	game.input = newInput
 }
 
 func (game *Game) GetSpriteSheet() render.SpriteSheet {
-	return game.SpriteSheet
+	return game.screen.SpriteSheet
 }
 
 func (game *Game) GetPixelArray() []byte {
-	return game.level.PixelArray
+	return game.screen.PixelArray
 }

@@ -1,6 +1,6 @@
-package game
+package input
 
-type Input struct {
+type Keyboard struct {
 	Up    bool
 	Down  bool
 	Left  bool

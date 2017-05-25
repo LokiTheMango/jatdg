@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/LokiTheMango/jatdg/game"
+	"github.com/LokiTheMango/jatdg/game/input"
 	"github.com/LokiTheMango/jatdg/graphics"
 )
 
@@ -51,7 +52,7 @@ func startGame(window *graphics.Window, gameI *game.Game, filePath string) {
 			gameI.DrawRequested = false
 		}
 		window.Mutex.Lock()
-		newInput := game.Input{
+		newInput := input.Keyboard{
 			Up: window.CharIsDown('w'), Down: window.CharIsDown('s'),
 			Left: window.CharIsDown('a'), Right: window.CharIsDown('d'),
 			Enter: window.KeycodeIsDown(40),

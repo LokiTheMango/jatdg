@@ -1,28 +1,28 @@
-package entities
+package tiles
 
 import "github.com/LokiTheMango/jatdg/game/render"
 import "github.com/LokiTheMango/jatdg/enums"
 
-type WallTile struct {
+type VoidTile struct {
 	Tile Tile
 }
 
-func NewWallTile(posX int, posY int, pixelArray []byte) WallTile {
-	//Wall Tile Sprite at 1, 0
+func NewVoidTile(posX int, posY int, pixelArray []byte) VoidTile {
+	//Void Tile Sprite at 0, 0
 	tile := Tile{
-		TileType: enums.TileType(enums.WALL),
+		TileType: enums.TileType(enums.VOID),
 		sprite: render.NewSprite(
 			pixelArray,
-			enums.TileType(enums.WALL),
-			1,
+			enums.TileType(enums.VOID),
+			0,
 			0),
 		X: posX,
 		Y: posY,
 		tileProperties: TileProperties{
-			isSolid: true,
+			isSolid: false,
 		},
 	}
-	return WallTile{
+	return VoidTile{
 		Tile: tile,
 	}
 }
