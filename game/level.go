@@ -11,26 +11,28 @@ type Level struct {
 	width  int
 	height int
 
-	SpriteSheet render.SpriteSheet
-	Tiles       []entities.Tile
+	spriteSheet render.SpriteSheet
+	tileSize    int
+	tiles       []entities.Tile
 }
 
 func NewLevel(spriteSheet render.SpriteSheet, width int, height int) Level {
 	level := Level{
-		SpriteSheet: spriteSheet,
+		spriteSheet: spriteSheet,
 		width:       width,
 		height:      height,
 	}
-	level.GenerateLevel()
+	level.generateLevel()
 	return level
 }
 
-func (level *Level) GenerateLevel() {
-	level.Tiles = make([]entities.Tile, level.height*level.width)
+func (level *Level) generateLevel() {
+	level.tiles = make([]entities.Tile, level.height*level.width)
 	for i := 0; i < level.height; i++ {
 		for j := 0; j < level.width; j++ {
-			nextSprite := randInt(0, 4)
-			level.Tiles[i+j] = entities.NewTile(level.SpriteSheet.PixelArray, enums.TileType(nextSprite), i, j)
+			//// random Tile generation for Tests
+			//nextTile := randInt(0, 4)
+			level.tiles[i+j] = entities.NewTile(i, j, enums.VOID, level.spriteSheet.PixelArray)
 		}
 	}
 }
@@ -38,21 +40,23 @@ func (level *Level) GenerateLevel() {
 func (level *Level) ParseFrameBuffer(size int, xOffset int, yOffset int) []byte {
 	framebuffer := make([]byte, size)
 	for y := 0; y < enums.HEIGHT; y++ {
-		yy := y + yOffset
-		if yy < 0 || yy >= enums.HEIGHT {
+		yOff := y + yOffset
+		if yOff < 0 || yOff >= enums.HEIGHT {
 			continue
 		}
+		// PIXEL WIDTH TIME 4 (RGBA)
 		for x := 0; x < enums.WIDTH*4; x++ {
-			xx := x + (xOffset << 2)
-			if xx < 0 || xx >= enums.WIDTH*4 {
+			xOff := x + (xOffset << 2)
+			if xOff < 0 || xOff >= enums.WIDTH*4 {
 				continue
 			}
-			tileIndex := ((yy >> 5) & 9) + ((xx >> 7) & 9)
-			tileArr := level.Tiles[tileIndex].GetPixelArray()
-			index := ((xx & 127) % 128) + ((yy&31)%32)*128
-			if index < 0 {
-				index *= -1
-			}
+			tileIndex := ((yOff >> 5) & (level.height - 1)) + ((xOff >> 7) & (level.width - 1))
+			tileArr := level.tiles[tileIndex].GetPixelArray()
+			tileWidth := enums.WIDTH_TILE
+			tileHeight := enums.HEIGHT_TILE
+			maskTileWidth := tileWidth - 1
+			maskTileHeight := tileHeight - 1
+			index := ((xOff & maskTileWidth) % tileWidth) + ((yOff&maskTileHeight)%tileHeight)*tileWidth
 			framebuffer[x+y*enums.WIDTH*4] = tileArr[index]
 		}
 	}

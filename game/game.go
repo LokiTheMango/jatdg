@@ -43,6 +43,12 @@ func (game *Game) Init(filePath string) {
 	game.parseFrameBuffer()
 }
 
+func (game *Game) createSpriteSheet(filePath string) {
+	spriteSheet, size := render.NewSpriteSheet(filePath)
+	game.SpriteSheet = spriteSheet
+	game.SpriteSheetSize = size
+}
+
 func (game *Game) createLevel() {
 	game.level = NewLevel(game.SpriteSheet, 10, 10)
 }
@@ -75,11 +81,6 @@ func (game *Game) UpdateInput(newInput Input) {
 	game.input = newInput
 }
 
-func (game *Game) createSpriteSheet(filePath string) {
-	spriteSheet, size := render.NewSpriteSheet(filePath)
-	game.SpriteSheet = spriteSheet
-	game.SpriteSheetSize = size
-}
 func (game *Game) GetSpriteMap() render.SpriteSheet {
 	return game.SpriteSheet
 }

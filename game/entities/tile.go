@@ -6,15 +6,56 @@ import (
 )
 
 type Tile struct {
-	TileType enums.TileType
-	sprite   render.Sprite
+	TileType       enums.TileType
+	sprite         render.Sprite
+	X              int
+	Y              int
+	tileProperties TileProperties
 }
 
-func NewTile(pixelArray []byte, tileType enums.TileType, posX int, posY int) Tile {
-	return Tile{
-		TileType: tileType,
-		sprite:   render.NewSprite(pixelArray, tileType, posX, posY),
+type TileProperties struct {
+	isSolid bool
+}
+
+type SpriteProperties struct {
+	TileType   enums.TileType
+	pixelArray []byte
+	posX       int
+	posY       int
+}
+
+func newTileProperties(isSolid bool) TileProperties {
+	return TileProperties{
+		isSolid: isSolid,
 	}
+}
+
+func newSpriteProperties(tileType enums.TileType, pixelArray []byte, posX int, posY int) SpriteProperties {
+	return SpriteProperties{
+		TileType:   tileType,
+		pixelArray: pixelArray,
+		posX:       posX,
+		posY:       posY,
+	}
+}
+
+func NewTile(posX int, posY int, tileType enums.TileType, pixelArray []byte) Tile {
+	tile := matchTileType(posX, posY, tileType, pixelArray)
+	return tile
+}
+
+func matchTileType(posX int, posY int, tileType enums.TileType, pixelArray []byte) Tile {
+	tile := Tile{
+		TileType: -1,
+	}
+	switch tileType {
+	case enums.VOID:
+		tile = NewVoidTile(posX, posY, pixelArray).Tile
+	}
+	if tile.TileType == -1 {
+		panic("Unsupported Tile Type")
+	}
+	return tile
 }
 
 //Getter for PixelArray
