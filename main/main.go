@@ -39,7 +39,7 @@ func startGame(window *graphics.Window, gameI *game.Game, filePath string) {
 		}
 		if gameI.DrawRequested && !window.StopDrawing {
 			window.Mutex.Lock()
-			copy(window.Pixel, gameI.PixelArray)
+			copy(window.Pixel, gameI.GetPixelArray())
 			window.RequestDraw()
 			window.Mutex.Unlock()
 			spent := time.Now().Sub(lastVBlankTime)

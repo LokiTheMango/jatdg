@@ -14,7 +14,6 @@ type Game struct {
 	DrawRequested   bool
 	SpriteSheet     render.SpriteSheet
 	SpriteSheetSize int
-	PixelArray      []byte
 	xOffset         int
 	yOffset         int
 }
@@ -40,7 +39,7 @@ func randInt(min int, max int) int {
 func (game *Game) Init(filePath string) {
 	game.createSpriteSheet(filePath)
 	game.createLevel()
-	game.parseFrameBuffer()
+	game.initScreen()
 }
 
 func (game *Game) createSpriteSheet(filePath string) {
@@ -50,16 +49,20 @@ func (game *Game) createSpriteSheet(filePath string) {
 }
 
 func (game *Game) createLevel() {
-	game.level = NewLevel(game.SpriteSheet, 10, 10)
+	game.level = NewLevel(game.SpriteSheet, 32, 32)
 }
 
-func (game *Game) parseFrameBuffer() {
-	game.PixelArray = game.level.ParseFrameBuffer(game.SpriteSheetSize, game.xOffset, game.yOffset)
+func (game *Game) initScreen() {
+	game.level.InitScreen(game.SpriteSheetSize)
 }
 
 func (game *Game) Update() {
 	game.checkInputForOffsets()
-	game.parseFrameBuffer()
+	game.render()
+}
+
+func (game *Game) render() {
+	game.level.RenderLevel(game.xOffset, game.yOffset)
 }
 
 func (game *Game) checkInputForOffsets() {
@@ -81,10 +84,10 @@ func (game *Game) UpdateInput(newInput Input) {
 	game.input = newInput
 }
 
-func (game *Game) GetSpriteMap() render.SpriteSheet {
+func (game *Game) GetSpriteSheet() render.SpriteSheet {
 	return game.SpriteSheet
 }
 
 func (game *Game) GetPixelArray() []byte {
-	return game.SpriteSheet.PixelArray
+	return game.level.PixelArray
 }

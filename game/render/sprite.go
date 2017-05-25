@@ -15,10 +15,10 @@ func NewSprite(pixelArray []byte, tileType enums.TileType, posX int, posY int) S
 		start := i * enums.WIDTH_TILE
 		end := start + enums.WIDTH_TILE
 
-		offsetY := posY * 4 * enums.HEIGHT_TILE * enums.WIDTH
+		offsetY := posY * enums.HEIGHT_TILE * enums.WIDTH
 		offsetX := posX * enums.WIDTH_TILE
 
-		startPix := i*enums.WIDTH*4 + offsetY + offsetX
+		startPix := i*enums.WIDTH + offsetY + offsetX
 		endPix := startPix + enums.WIDTH_TILE
 
 		copy(pixel[start:end], pixelArray[startPix:endPix])

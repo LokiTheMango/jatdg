@@ -45,17 +45,18 @@ func NewTile(posX int, posY int, tileType enums.TileType, pixelArray []byte) Til
 }
 
 func matchTileType(posX int, posY int, tileType enums.TileType, pixelArray []byte) Tile {
-	tile := Tile{
-		TileType: -1,
-	}
+	tile := Tile{}
 	switch tileType {
-	case enums.VOID:
+	case enums.WALL:
+		tile = NewWallTile(posX, posY, pixelArray).Tile
+	default:
 		tile = NewVoidTile(posX, posY, pixelArray).Tile
 	}
-	if tile.TileType == -1 {
-		panic("Unsupported Tile Type")
-	}
 	return tile
+}
+
+func (tile *Tile) Render(x int, y int) {
+
 }
 
 //Getter for PixelArray
