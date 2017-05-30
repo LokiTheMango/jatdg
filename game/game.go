@@ -5,6 +5,7 @@ import (
 	"github.com/LokiTheMango/jatdg/game/input"
 	"github.com/LokiTheMango/jatdg/game/level"
 	"github.com/LokiTheMango/jatdg/game/render"
+	"github.com/LokiTheMango/jatdg/game/tiles"
 )
 
 // Game Object
@@ -13,6 +14,7 @@ type Game struct {
 	level         level.Level
 	input         input.Keyboard
 	DrawRequested bool
+	Towers        []entities.Entity
 	camera        entities.Mob
 }
 
@@ -27,14 +29,26 @@ func New() *Game {
 }
 
 func (game *Game) Init(filePath string) {
-	game.screen = NewScreen(filePath + "tiles.jpg")
-	game.level = level.NewLevel(game.screen.SpriteSheet, filePath+"level.jpg")
-	game.screen.SetLevel(game.level)
+	game.screen = NewScreen(filePath + "tiles.png")
+	level, tiles := level.NewLevel(game.screen.SpriteSheet, filePath+"level.png")
+	game.level = level
+	game.screen.SetLevel(&game.level)
 	game.camera = entities.NewCamera(&game.level)
+	game.createTowerEntities(tiles)
+}
+
+func (game *Game) createTowerEntities(tiles []*tiles.Tile) {
+	game.Towers = make([]entities.Entity, game.level.NumTowers)
+	for i, _ := range game.Towers {
+		game.Towers[i] = entities.NewTower(tiles[i])
+	}
 }
 
 func (game *Game) Update() {
 	game.camera.Update()
+	for _, tower := range game.Towers {
+		tower.Update()
+	}
 	game.moveObjects()
 	game.clearScreen()
 	game.render()

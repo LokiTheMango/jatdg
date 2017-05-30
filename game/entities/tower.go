@@ -2,21 +2,18 @@ package entities
 
 import (
 	"github.com/LokiTheMango/jatdg/game/level"
-	"github.com/LokiTheMango/jatdg/game/render"
+	"github.com/LokiTheMango/jatdg/game/tiles"
 )
 
 type Tower struct {
-	x       int
-	y       int
 	removed bool
 	level   level.Level
-	sprite  render.Sprite
+	tile    *tiles.Tile
 }
 
-func NewTower(x int, y int) Entity {
+func NewTower(tile *tiles.Tile) Entity {
 	return &Tower{
-		x: x,
-		y: y,
+		tile: tile,
 	}
 }
 
@@ -27,10 +24,10 @@ func (tower *Tower) Render() {
 
 }
 func (tower *Tower) GetX() int {
-	return tower.x
+	return tower.tile.X
 }
 func (tower *Tower) GetY() int {
-	return tower.y
+	return tower.tile.Y
 }
 func (tower *Tower) Remove() {
 

@@ -8,7 +8,7 @@ import (
 )
 
 type Screen struct {
-	level           level.Level
+	level           *level.Level
 	SpriteSheet     render.SpriteSheet
 	SpriteSheetSize int
 	PixelArray      []byte
@@ -19,7 +19,7 @@ type Screen struct {
 
 func NewScreen(filePath string) Screen {
 	screen := Screen{
-		level:           level.Level{},
+		level:           &level.Level{},
 		SpriteSheet:     render.SpriteSheet{},
 		SpriteSheetSize: 0,
 	}
@@ -28,7 +28,7 @@ func NewScreen(filePath string) Screen {
 	return screen
 }
 
-func (screen *Screen) SetLevel(level level.Level) {
+func (screen *Screen) SetLevel(level *level.Level) {
 	screen.level = level
 }
 

@@ -4,8 +4,8 @@ import (
 	"image"
 	"image/draw"
 
-	//import jpeg
-	_ "image/jpeg"
+	//import png
+	_ "image/png"
 	"os"
 )
 

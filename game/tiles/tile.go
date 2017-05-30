@@ -47,6 +47,8 @@ func NewTile(posX int, posY int, tileType enums.TileType, pixelArray []byte) Til
 func matchTileType(posX int, posY int, tileType enums.TileType, pixelArray []byte) Tile {
 	tile := Tile{}
 	switch tileType {
+	case enums.TOWER:
+		tile = NewTowerTile(posX, posY, pixelArray).Tile
 	case enums.WALL:
 		tile = NewWallTile(posX, posY, pixelArray).Tile
 	default:
