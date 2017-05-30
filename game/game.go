@@ -28,10 +28,10 @@ func New() *Game {
 }
 
 func (game *Game) Init(filePath string) {
-	game.screen = NewScreen(filePath)
-	game.level = level.NewLevel(game.screen.SpriteSheet, enums.LEVEL_WIDTH, enums.LEVEL_HEIGHT)
+	game.screen = NewScreen(filePath + "tiles.jpg")
+	game.level = level.NewLevel(game.screen.SpriteSheet, filePath+"level.jpg", enums.LEVEL_WIDTH, enums.LEVEL_HEIGHT)
 	game.screen.SetLevel(game.level)
-	game.camera = entities.NewCamera()
+	game.camera = entities.NewCamera(&game.level)
 }
 
 func (game *Game) Update() {

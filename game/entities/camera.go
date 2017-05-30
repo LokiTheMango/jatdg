@@ -8,11 +8,13 @@ type Camera struct {
 	x       int
 	y       int
 	removed bool
-	level   level.Level
+	level   *level.Level
 }
 
-func NewCamera() Mob {
-	return &Camera{}
+func NewCamera(level *level.Level) Mob {
+	return &Camera{
+		level: level,
+	}
 }
 
 func (camera *Camera) Move(xa int, ya int) {

@@ -92,10 +92,12 @@ func (screen *Screen) renderTile(xp int, yp int, tile tiles.Tile) {
 }
 
 func (screen *Screen) getTileIndex(x int, y int) int {
-	if x < 0 || y < 0 || x >= enums.LEVEL_WIDTH || y >= enums.LEVEL_WIDTH {
+	width := screen.level.Width
+	height := screen.level.Height
+	if x < 0 || y < 0 || x >= width || y >= width {
 		return -1
 	}
-	tileIndex := x + y*enums.LEVEL_WIDTH
+	tileIndex := x + y*width
 	return tileIndex
 }
 

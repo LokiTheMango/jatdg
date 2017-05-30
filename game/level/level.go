@@ -11,19 +11,22 @@ import (
 
 //Level Object
 type Level struct {
-	width  int
-	height int
+	Width  int
+	Height int
 
 	spriteSheet render.SpriteSheet
+	levelSheet  render.LevelSheet
 	Tiles       []tiles.Tile
 }
 
-func NewLevel(spriteSheet render.SpriteSheet, width int, height int) Level {
+func NewLevel(spriteSheet render.SpriteSheet, filePath string) Level {
 	rand.Seed(time.Now().UTC().UnixNano())
+	levelSheet, width, height := render.NewLevelSheet(filePath)
 	level := Level{
 		spriteSheet: spriteSheet,
-		width:       width,
-		height:      height,
+		levelSheet:  levelSheet,
+		Width:       width,
+		Height:      height,
 	}
 	level.generateLevel()
 	return level
@@ -34,13 +37,13 @@ func randInt(min int, max int) int {
 }
 
 func (level *Level) generateLevel() {
-	level.Tiles = make([]tiles.Tile, level.height*level.width)
-	for i := 0; i < level.height; i++ {
-		for j := 0; j < level.width; j++ {
+	level.Tiles = make([]tiles.Tile, level.Height*level.Width)
+	for i := 0; i < level.Height; i++ {
+		for j := 0; j < level.Width; j++ {
 			//// random Tile generation for Tests
 			nextTile := randInt(0, 2)
 			tileType := enums.TileType(nextTile)
-			level.Tiles[i*level.width+j] = tiles.NewTile(j, i, tileType, level.spriteSheet.PixelArray)
+			level.Tiles[i*level.Width+j] = tiles.NewTile(j, i, tileType, level.spriteSheet.PixelArray)
 		}
 	}
 }
