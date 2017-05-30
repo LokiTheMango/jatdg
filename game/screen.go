@@ -94,7 +94,7 @@ func (screen *Screen) renderTile(xp int, yp int, tile tiles.Tile) {
 func (screen *Screen) getTileIndex(x int, y int) int {
 	width := screen.level.Width
 	height := screen.level.Height
-	if x < 0 || y < 0 || x >= width || y >= width {
+	if x < 0 || y < 0 || x >= width || y >= height {
 		return -1
 	}
 	tileIndex := x + y*width

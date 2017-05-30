@@ -34,7 +34,7 @@ func startGame(window *graphics.Window, gameI *game.Game, filePath string) {
 	lastVBlankTime := time.Now()
 
 	for {
-		if time.Now().Sub(lastVBlankTime) > time.Millisecond*16 {
+		if time.Now().Sub(lastVBlankTime) > time.Millisecond*8 {
 			gameI.DrawRequested = true
 			gameI.Update()
 		}
@@ -44,7 +44,7 @@ func startGame(window *graphics.Window, gameI *game.Game, filePath string) {
 			window.RequestDraw()
 			window.Mutex.Unlock()
 			spent := time.Now().Sub(lastVBlankTime)
-			toWait := 17*time.Millisecond - spent
+			toWait := 8*time.Millisecond - spent
 			if toWait > time.Duration(0) {
 				<-time.NewTimer(toWait).C
 			}

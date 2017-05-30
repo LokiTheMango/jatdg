@@ -1,7 +1,6 @@
 package game
 
 import (
-	"github.com/LokiTheMango/jatdg/enums"
 	"github.com/LokiTheMango/jatdg/game/entities"
 	"github.com/LokiTheMango/jatdg/game/input"
 	"github.com/LokiTheMango/jatdg/game/level"
@@ -29,7 +28,7 @@ func New() *Game {
 
 func (game *Game) Init(filePath string) {
 	game.screen = NewScreen(filePath + "tiles.jpg")
-	game.level = level.NewLevel(game.screen.SpriteSheet, filePath+"level.jpg", enums.LEVEL_WIDTH, enums.LEVEL_HEIGHT)
+	game.level = level.NewLevel(game.screen.SpriteSheet, filePath+"level.jpg")
 	game.screen.SetLevel(game.level)
 	game.camera = entities.NewCamera(&game.level)
 }

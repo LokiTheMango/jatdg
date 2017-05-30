@@ -41,9 +41,39 @@ func (level *Level) generateLevel() {
 	for i := 0; i < level.Height; i++ {
 		for j := 0; j < level.Width; j++ {
 			//// random Tile generation for Tests
-			nextTile := randInt(0, 2)
+			//nextTile := randInt(0, 2)
+			nextTile := 1
+			indexHeight := i * level.Width * 4
+			pix := level.levelSheet.PixelArray[indexHeight+j*4 : indexHeight+(j+1)*4]
+			wall := []byte{255, 255, 255, 255}
+			if testEq(pix, wall) {
+				nextTile = 0
+			}
 			tileType := enums.TileType(nextTile)
 			level.Tiles[i*level.Width+j] = tiles.NewTile(j, i, tileType, level.spriteSheet.PixelArray)
 		}
 	}
+}
+
+func testEq(a, b []byte) bool {
+
+	if a == nil && b == nil {
+		return true
+	}
+
+	if a == nil || b == nil {
+		return false
+	}
+
+	if len(a) != len(b) {
+		return false
+	}
+
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+
+	return true
 }
