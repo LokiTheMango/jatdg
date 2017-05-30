@@ -15,6 +15,7 @@ type Game struct {
 	input         input.Keyboard
 	DrawRequested bool
 	Towers        []entities.Entity
+	Enemies       []entities.Mob
 	camera        entities.Mob
 }
 
@@ -45,7 +46,6 @@ func (game *Game) createTowerEntities(tiles []*tiles.Tile) {
 }
 
 func (game *Game) Update() {
-	game.camera.Update()
 	for _, tower := range game.Towers {
 		tower.Update()
 	}
@@ -81,6 +81,19 @@ func (game *Game) moveObjects() {
 	}
 	if xOffset != 0 || yOffset != 0 {
 		game.camera.Move(xOffset, yOffset)
+	}
+	//Move enemies here
+	//game.moveWithCollisionCheck(xOffset, yOffset)
+}
+
+func (game *Game) moveWithCollisionCheck(xa int, ya int) {
+	for _, enemy := range game.Enemies {
+		x := (enemy.GetX() + xa) / 32
+		y := (enemy.GetY()*game.level.Width + ya) / 32
+		tileType := game.level.Tiles[x+y].TileType
+		if tileType == 0 {
+			enemy.Move(xa, ya)
+		}
 	}
 }
 

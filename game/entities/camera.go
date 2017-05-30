@@ -21,12 +21,6 @@ func (camera *Camera) Move(xa int, ya int) {
 	camera.x += xa
 	camera.y += ya
 }
-func (camera *Camera) Update() {
-
-}
-func (camera *Camera) Render() {
-
-}
 func (camera *Camera) GetX() int {
 	return camera.x
 }

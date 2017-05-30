@@ -22,16 +22,8 @@ func NewEnemy(x int, y int, sprite render.Sprite) Mob {
 }
 
 func (enemy *Enemy) Move(xa int, ya int) {
-	if !enemy.collision() {
-		enemy.x += xa
-		enemy.y += ya
-	}
-}
-func (enemy *Enemy) Update() {
-
-}
-func (enemy *Enemy) Render() {
-
+	enemy.x += xa
+	enemy.y += ya
 }
 func (enemy *Enemy) GetX() int {
 	return enemy.x
@@ -43,9 +35,5 @@ func (enemy *Enemy) Remove() {
 
 }
 func (enemy *Enemy) IsRemoved() bool {
-	return false
-}
-
-func (enemy *Enemy) collision() bool {
 	return false
 }

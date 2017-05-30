@@ -10,8 +10,6 @@ type Entity interface {
 }
 
 type Mob interface {
-	Update()
-	Render()
 	GetX() int
 	GetY() int
 	Remove()
