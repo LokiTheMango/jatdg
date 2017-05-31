@@ -9,23 +9,27 @@ type Enemy struct {
 	removed bool
 	level   level.Level
 	tile    *tiles.Tile
+	X       int
+	Y       int
 }
 
 func NewEnemy(tile *tiles.Tile) Mob {
 	return &Enemy{
 		tile: tile,
+		X:    tile.X << 7,
+		Y:    tile.Y << 5,
 	}
 }
 
 func (enemy *Enemy) Move(xa int, ya int) {
-	enemy.tile.X += xa
-	enemy.tile.X += ya
+	enemy.X += xa
+	enemy.Y += ya
 }
 func (enemy *Enemy) GetX() int {
-	return enemy.tile.X
+	return enemy.X
 }
 func (enemy *Enemy) GetY() int {
-	return enemy.tile.Y
+	return enemy.Y
 }
 func (enemy *Enemy) GetTile() *tiles.Tile {
 	return enemy.tile

@@ -2,6 +2,7 @@ package game
 
 import (
 	"fmt"
+	"math"
 
 	"github.com/LokiTheMango/jatdg/game/entities"
 	"github.com/LokiTheMango/jatdg/game/input"
@@ -80,7 +81,7 @@ func (game *Game) Update() {
 	for _, enemy := range game.Enemies {
 		if enemy != nil {
 			tile := *enemy.GetTile()
-			game.screen.RenderTile(enemy.GetX(), enemy.GetY(), tile)
+			game.screen.RenderMob(enemy.GetX(), enemy.GetY(), tile)
 		}
 	}
 }
@@ -128,20 +129,40 @@ func (game *Game) moveObjects() {
 	}
 	if xOffset != 0 || yOffset != 0 {
 		game.camera.Move(xOffset, yOffset)
+		game.moveWithCollisionCheck(xOffset, 0)
+		game.moveWithCollisionCheck(0, yOffset)
 	}
-	game.moveWithCollisionCheck(xOffset, yOffset)
 }
 
 func (game *Game) moveWithCollisionCheck(xa int, ya int) {
 	for _, enemy := range game.Enemies {
 		if enemy != nil {
-			x := (enemy.GetX() + xa) / 32
-			y := (enemy.GetY()*game.level.Width + ya) / 32
+			x := int((float64(enemy.GetX()+xa) / 128) + 0.5)
+			y := (int((float64(enemy.GetY()+ya) / 32) + 0.5)) * game.level.Width
 			if !game.level.Tiles[x+y].TileProperties.IsSolid {
-				enemy.Move(xa, ya)
+				fmt.Println("moving enemy")
+				enemy.Move(xa<<2, ya)
+			} else {
+				fmt.Println("solid tile")
+				fmt.Println(game.level.Tiles[x+y].X)
+				fmt.Println(game.level.Tiles[x+y].Y)
 			}
 		}
 	}
+}
+
+func Round(val float64, roundOn float64, places int) (newVal float64) {
+	var round float64
+	pow := math.Pow(10, float64(places))
+	digit := pow * val
+	_, div := math.Modf(digit)
+	if div >= roundOn {
+		round = math.Ceil(digit)
+	} else {
+		round = math.Floor(digit)
+	}
+	newVal = round / pow
+	return
 }
 
 func (game *Game) UpdateInput(newInput input.Keyboard) {
