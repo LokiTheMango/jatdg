@@ -19,7 +19,7 @@ type Game struct {
 	Enemies       []entities.Mob
 	camera        entities.Mob
 	time          int
-	NumEnemies
+	numEnemies    int
 }
 
 //Constructor
@@ -28,6 +28,8 @@ func New() *Game {
 		screen:        Screen{},
 		input:         input.Keyboard{},
 		DrawRequested: false,
+		time:          0,
+		numEnemies:    0,
 	}
 	return game
 }
@@ -40,6 +42,7 @@ func (game *Game) Init(filePath string) {
 	game.camera = entities.NewCamera(&game.level)
 	game.createTowerEntities(towerTiles)
 	game.createSpawnerEntities(spawnTiles)
+	game.Enemies = make([]entities.Mob, 500)
 }
 
 func (game *Game) createTowerEntities(tiles []*tiles.Tile) {
@@ -54,31 +57,44 @@ func (game *Game) createTowerEntities(tiles []*tiles.Tile) {
 }
 
 func (game *Game) createSpawnerEntities(tiles []*tiles.Tile) {
-	game.Enemies = make([]entities.Entity, game.level.NumEnemySpawn)
+	game.Spawns = make([]entities.Entity, game.level.NumEnemySpawn)
 	j := 0
-	for i, _ := range game.Enemies {
+	for i, _ := range game.Spawns {
 		for tiles[j] == nil {
 			j++
 		}
-		game.Towers[i] = entities.NewEnemySpawn(tiles[j].X, tiles[j].Y)
+		game.Spawns[i] = entities.NewEnemySpawn(tiles[j].X, tiles[j].Y)
 	}
 }
 
 func (game *Game) Update() {
 	game.spawnEnemies()
-	game.camera.Update()
 	for _, tower := range game.Towers {
 		tower.Update()
 	}
 	game.moveObjects()
 	game.clearScreen()
 	game.render()
+	for _, enemy := range game.Enemies {
+		if enemy != nil {
+			tile := *enemy.GetTile()
+			game.screen.RenderTile(enemy.GetX(), enemy.GetY(), tile)
+		}
+	}
 }
 
 func (game *Game) spawnEnemies() {
 	game.time++
-	if time%20 == 0 {
-		g
+	if game.time%20 == 0 {
+		for _, spawn := range game.Spawns {
+			if spawn != nil {
+				x := spawn.GetX()
+				y := spawn.GetY()
+				tile := game.level.CreateEnemy(x, y)
+				game.Enemies[game.numEnemies] = entities.NewEnemy(tile)
+				game.numEnemies++
+			}
+		}
 	}
 }
 
@@ -110,17 +126,17 @@ func (game *Game) moveObjects() {
 	if xOffset != 0 || yOffset != 0 {
 		game.camera.Move(xOffset, yOffset)
 	}
-	//Move enemies here
-	//game.moveWithCollisionCheck(xOffset, yOffset)
+	game.moveWithCollisionCheck(xOffset, yOffset)
 }
 
 func (game *Game) moveWithCollisionCheck(xa int, ya int) {
 	for _, enemy := range game.Enemies {
-		x := (enemy.GetX() + xa) / 32
-		y := (enemy.GetY()*game.level.Width + ya) / 32
-		tileType := game.level.Tiles[x+y].TileType
-		if tileType == 0 {
-			enemy.Move(xa, ya)
+		if enemy != nil {
+			x := (enemy.GetX() + xa) / 32
+			y := (enemy.GetY()*game.level.Width + ya) / 32
+			if !game.level.Tiles[x+y].TileProperties.IsSolid {
+				enemy.Move(xa, ya)
+			}
 		}
 	}
 }

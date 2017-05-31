@@ -3,26 +3,26 @@ package tiles
 import "github.com/LokiTheMango/jatdg/game/render"
 import "github.com/LokiTheMango/jatdg/enums"
 
-type VoidTile struct {
+type EnemyTile struct {
 	Tile Tile
 }
 
-func NewVoidTile(posX int, posY int, pixelArray []byte) VoidTile {
-	//Void Tile Sprite at 0, 0
+func NewEnemyTile(posX int, posY int, pixelArray []byte) EnemyTile {
+	//Tower Tile Sprite at 3, 0
 	tile := Tile{
-		TileType: enums.TileType(enums.VOID),
+		TileType: enums.TileType(enums.ENEMY),
 		sprite: render.NewSprite(
 			pixelArray,
-			enums.TileType(enums.VOID),
-			0,
+			enums.TileType(enums.ENEMY),
+			3,
 			0),
 		X: posX,
 		Y: posY,
 		TileProperties: TileProperties{
-			IsSolid: false,
+			IsSolid: true,
 		},
 	}
-	return VoidTile{
+	return EnemyTile{
 		Tile: tile,
 	}
 }

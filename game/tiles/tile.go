@@ -10,11 +10,11 @@ type Tile struct {
 	sprite         render.Sprite
 	X              int
 	Y              int
-	tileProperties TileProperties
+	TileProperties TileProperties
 }
 
 type TileProperties struct {
-	isSolid bool
+	IsSolid bool
 }
 
 type SpriteProperties struct {
@@ -26,7 +26,7 @@ type SpriteProperties struct {
 
 func newTileProperties(isSolid bool) TileProperties {
 	return TileProperties{
-		isSolid: isSolid,
+		IsSolid: isSolid,
 	}
 }
 

@@ -63,12 +63,12 @@ func (screen *Screen) RenderLevel(xScroll int, yScroll int) {
 			} else {
 				tile = screen.level.Tiles[tileIndex]
 			}
-			screen.renderTile(x, y, tile)
+			screen.RenderTile(x, y, tile)
 		}
 	}
 }
 
-func (screen *Screen) renderTile(xp int, yp int, tile tiles.Tile) {
+func (screen *Screen) RenderTile(xp int, yp int, tile tiles.Tile) {
 	xp = xp << 7
 	yp = yp << 5
 	xp -= screen.xOffset

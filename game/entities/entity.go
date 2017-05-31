@@ -1,5 +1,7 @@
 package entities
 
+import "github.com/LokiTheMango/jatdg/game/tiles"
+
 type Entity interface {
 	Update()
 	Render()
@@ -12,6 +14,7 @@ type Entity interface {
 type Mob interface {
 	GetX() int
 	GetY() int
+	GetTile() *tiles.Tile
 	Remove()
 	IsRemoved() bool
 	Move(xa int, ya int)

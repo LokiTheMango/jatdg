@@ -82,8 +82,9 @@ func (level *Level) generateLevel() ([]*tiles.Tile, []*tiles.Tile) {
 	return towerTiles, spawnTiles
 }
 
-func CreateEnemy(x int, y int) *tiles.Tile {
-	tile := tiles.NewTile(x, y)
+func (level *Level) CreateEnemy(x int, y int) *tiles.Tile {
+	tile := tiles.NewTile(x, y, enums.TileType(enums.ENEMY), level.spriteSheet.PixelArray)
+	return &tile
 }
 
 func testEq(a, b []byte) bool {

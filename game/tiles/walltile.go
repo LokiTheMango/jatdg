@@ -18,8 +18,8 @@ func NewWallTile(posX int, posY int, pixelArray []byte) WallTile {
 			0),
 		X: posX,
 		Y: posY,
-		tileProperties: TileProperties{
-			isSolid: true,
+		TileProperties: TileProperties{
+			IsSolid: true,
 		},
 	}
 	return WallTile{

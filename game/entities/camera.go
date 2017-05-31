@@ -2,6 +2,7 @@ package entities
 
 import (
 	"github.com/LokiTheMango/jatdg/game/level"
+	"github.com/LokiTheMango/jatdg/game/tiles"
 )
 
 type Camera struct {
@@ -26,6 +27,9 @@ func (camera *Camera) GetX() int {
 }
 func (camera *Camera) GetY() int {
 	return camera.y
+}
+func (camera *Camera) GetTile() *tiles.Tile {
+	return &tiles.Tile{}
 }
 func (camera *Camera) Remove() {
 

@@ -6,30 +6,29 @@ import (
 )
 
 type Enemy struct {
-	x       int
-	y       int
 	removed bool
 	level   level.Level
 	tile    *tiles.Tile
 }
 
-func NewEnemy(x int, y int, tile *tiles.Tile) Mob {
+func NewEnemy(tile *tiles.Tile) Mob {
 	return &Enemy{
-		x:    x,
-		y:    y,
 		tile: tile,
 	}
 }
 
 func (enemy *Enemy) Move(xa int, ya int) {
-	enemy.x += xa
-	enemy.y += ya
+	enemy.tile.X += xa
+	enemy.tile.X += ya
 }
 func (enemy *Enemy) GetX() int {
-	return enemy.x
+	return enemy.tile.X
 }
 func (enemy *Enemy) GetY() int {
-	return enemy.y
+	return enemy.tile.Y
+}
+func (enemy *Enemy) GetTile() *tiles.Tile {
+	return enemy.tile
 }
 func (enemy *Enemy) Remove() {
 
