@@ -44,7 +44,7 @@ func (game *Game) Init(filePath string) {
 	game.camera = entities.NewCamera(&game.level)
 	game.createTowerEntities(towerTiles)
 	game.createSpawnerEntities(spawnTiles)
-	game.Enemies = make([]entities.Mob, 1)
+	game.Enemies = make([]entities.Mob, 500)
 }
 
 func (game *Game) createTowerEntities(tiles []*tiles.Tile) {
@@ -80,7 +80,7 @@ func (game *Game) Update() {
 	for _, enemy := range game.Enemies {
 		if enemy != nil {
 			tile := *enemy.GetTile()
-			game.screen.RenderTile2(enemy.GetX(), enemy.GetY(), tile)
+			game.screen.RenderTile(enemy.GetX(), enemy.GetY(), tile)
 		}
 	}
 }

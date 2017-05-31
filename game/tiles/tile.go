@@ -51,6 +51,8 @@ func matchTileType(posX int, posY int, tileType enums.TileType, pixelArray []byt
 		tile = NewTowerTile(posX, posY, pixelArray).Tile
 	case enums.WALL:
 		tile = NewWallTile(posX, posY, pixelArray).Tile
+	case enums.ENEMY:
+		tile = NewEnemyTile(posX, posY, pixelArray).Tile
 	default:
 		tile = NewVoidTile(posX, posY, pixelArray).Tile
 	}
