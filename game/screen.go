@@ -91,6 +91,29 @@ func (screen *Screen) RenderTile(xp int, yp int, tile tiles.Tile) {
 	}
 }
 
+func (screen *Screen) RenderTile2(xp int, yp int, tile tiles.Tile) {
+	xp = xp << 7
+	yp = yp << 5
+	xp -= screen.xOffset
+	yp -= screen.yOffset
+	tilePixels := tile.GetPixelArray()
+	for y := 0; y < enums.HEIGHT_TILE; y++ {
+		ya := y + yp
+		for x := 0; x < enums.WIDTH_TILE; x++ {
+			xa := x + xp
+			if xa < (-1*enums.WIDTH_TILE) || xa >= enums.WIDTH || ya < 0 || ya >= enums.HEIGHT {
+				break
+			}
+			if xa < 0 {
+				xa = 0
+			}
+			indexPix := xa + ya*enums.WIDTH
+			indexTilePix := x + y*enums.WIDTH_TILE
+			screen.PixelArray[indexPix] = tilePixels[indexTilePix]
+		}
+	}
+}
+
 func (screen *Screen) getTileIndex(x int, y int) int {
 	width := screen.level.Width
 	height := screen.level.Height

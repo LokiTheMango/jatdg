@@ -1,6 +1,8 @@
 package game
 
 import (
+	"fmt"
+
 	"github.com/LokiTheMango/jatdg/game/entities"
 	"github.com/LokiTheMango/jatdg/game/input"
 	"github.com/LokiTheMango/jatdg/game/level"
@@ -42,7 +44,7 @@ func (game *Game) Init(filePath string) {
 	game.camera = entities.NewCamera(&game.level)
 	game.createTowerEntities(towerTiles)
 	game.createSpawnerEntities(spawnTiles)
-	game.Enemies = make([]entities.Mob, 500)
+	game.Enemies = make([]entities.Mob, 1)
 }
 
 func (game *Game) createTowerEntities(tiles []*tiles.Tile) {
@@ -78,16 +80,17 @@ func (game *Game) Update() {
 	for _, enemy := range game.Enemies {
 		if enemy != nil {
 			tile := *enemy.GetTile()
-			game.screen.RenderTile(enemy.GetX(), enemy.GetY(), tile)
+			game.screen.RenderTile2(enemy.GetX(), enemy.GetY(), tile)
 		}
 	}
 }
 
 func (game *Game) spawnEnemies() {
 	game.time++
-	if game.time%20 == 0 {
+	if game.time%1000 == 0 {
 		for _, spawn := range game.Spawns {
 			if spawn != nil {
+				fmt.Println("created Enemy")
 				x := spawn.GetX()
 				y := spawn.GetY()
 				tile := game.level.CreateEnemy(x, y)
