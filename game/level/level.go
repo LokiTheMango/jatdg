@@ -22,7 +22,7 @@ type Level struct {
 	NumEnemySpawn int
 }
 
-func NewLevel(spriteSheet render.SpriteSheet, filePath string) (Level, []*tiles.Tile) {
+func NewLevel(spriteSheet render.SpriteSheet, filePath string) (Level, []*tiles.Tile, []*tiles.Tile) {
 	rand.Seed(time.Now().UTC().UnixNano())
 	levelSheet, width, height := render.NewLevelSheet(filePath)
 	level := Level{
@@ -33,23 +33,25 @@ func NewLevel(spriteSheet render.SpriteSheet, filePath string) (Level, []*tiles.
 		NumTowers:     0,
 		NumEnemySpawn: 0,
 	}
-	tiles := level.generateLevel()
-	return level, tiles
+	towerTiles, spawnTiles := level.generateLevel()
+	return level, towerTiles, spawnTiles
 }
 
 func randInt(min int, max int) int {
 	return min + rand.Intn(max-min)
 }
 
-func (level *Level) generateLevel() []*tiles.Tile {
+func (level *Level) generateLevel() ([]*tiles.Tile, []*tiles.Tile) {
 	level.Tiles = make([]tiles.Tile, level.Height*level.Width)
-	entityTiles := make([]*tiles.Tile, level.Height*level.Width)
+	towerTiles := make([]*tiles.Tile, level.Height*level.Width)
+	spawnTiles := make([]*tiles.Tile, level.Height*level.Width)
 	for i := 0; i < level.Height; i++ {
 		for j := 0; j < level.Width; j++ {
 			//// random Tile generation for Tests
 			//nextTile := randInt(0, 2)
 			nextTile := 0
-			isEntity := false
+			isTower := false
+			isSpawn := false
 			indexHeight := i * level.Width * 4
 			pix := level.levelSheet.PixelArray[indexHeight+j*4 : indexHeight+(j+1)*4]
 			wall := []byte{0, 0, 0, 255}
@@ -60,21 +62,28 @@ func (level *Level) generateLevel() []*tiles.Tile {
 			} else if testEq(pix, tower) {
 				nextTile = 2
 				level.NumTowers++
-				isEntity = true
+				isTower = true
 			} else if testEq(pix, spawn) {
 				nextTile = 0
 				level.NumEnemySpawn++
-				isEntity = true
+				isSpawn = true
 			}
 			tileType := enums.TileType(nextTile)
 			tile := tiles.NewTile(j, i, tileType, level.spriteSheet.PixelArray)
-			if isEntity == true {
-				entityTiles[level.NumTowers-1] = &tile
+			if isTower == true {
+				towerTiles[level.NumTowers-1] = &tile
+			}
+			if isSpawn == true {
+				spawnTiles[level.NumTowers-1] = &tile
 			}
 			level.Tiles[i*level.Width+j] = tile
 		}
 	}
-	return entityTiles
+	return towerTiles, spawnTiles
+}
+
+func CreateEnemy(x int, y int) *tiles.Tile {
+	tile := tiles.NewTile(x, y)
 }
 
 func testEq(a, b []byte) bool {

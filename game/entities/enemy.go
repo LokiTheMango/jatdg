@@ -2,7 +2,7 @@ package entities
 
 import (
 	"github.com/LokiTheMango/jatdg/game/level"
-	"github.com/LokiTheMango/jatdg/game/render"
+	"github.com/LokiTheMango/jatdg/game/tiles"
 )
 
 type Enemy struct {
@@ -10,14 +10,14 @@ type Enemy struct {
 	y       int
 	removed bool
 	level   level.Level
-	sprite  render.Sprite
+	tile    *tiles.Tile
 }
 
-func NewEnemy(x int, y int, sprite render.Sprite) Mob {
+func NewEnemy(x int, y int, tile *tiles.Tile) Mob {
 	return &Enemy{
-		x:      x,
-		y:      y,
-		sprite: sprite,
+		x:    x,
+		y:    y,
+		tile: tile,
 	}
 }
 

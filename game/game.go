@@ -15,8 +15,11 @@ type Game struct {
 	input         input.Keyboard
 	DrawRequested bool
 	Towers        []entities.Entity
+	Spawns        []entities.Entity
 	Enemies       []entities.Mob
 	camera        entities.Mob
+	time          int
+	NumEnemies
 }
 
 //Constructor
@@ -31,27 +34,52 @@ func New() *Game {
 
 func (game *Game) Init(filePath string) {
 	game.screen = NewScreen(filePath + "tiles.png")
-	level, tiles := level.NewLevel(game.screen.SpriteSheet, filePath+"level.png")
+	level, towerTiles, spawnTiles := level.NewLevel(game.screen.SpriteSheet, filePath+"level.png")
 	game.level = level
 	game.screen.SetLevel(&game.level)
 	game.camera = entities.NewCamera(&game.level)
-	game.createTowerEntities(tiles)
+	game.createTowerEntities(towerTiles)
+	game.createSpawnerEntities(spawnTiles)
 }
 
 func (game *Game) createTowerEntities(tiles []*tiles.Tile) {
 	game.Towers = make([]entities.Entity, game.level.NumTowers)
+	j := 0
 	for i, _ := range game.Towers {
-		game.Towers[i] = entities.NewTower(tiles[i])
+		for tiles[j] == nil {
+			j++
+		}
+		game.Towers[i] = entities.NewTower(tiles[j])
+	}
+}
+
+func (game *Game) createSpawnerEntities(tiles []*tiles.Tile) {
+	game.Enemies = make([]entities.Entity, game.level.NumEnemySpawn)
+	j := 0
+	for i, _ := range game.Enemies {
+		for tiles[j] == nil {
+			j++
+		}
+		game.Towers[i] = entities.NewEnemySpawn(tiles[j].X, tiles[j].Y)
 	}
 }
 
 func (game *Game) Update() {
+	game.spawnEnemies()
+	game.camera.Update()
 	for _, tower := range game.Towers {
 		tower.Update()
 	}
 	game.moveObjects()
 	game.clearScreen()
 	game.render()
+}
+
+func (game *Game) spawnEnemies() {
+	game.time++
+	if time%20 == 0 {
+		g
+	}
 }
 
 func (game *Game) render() {

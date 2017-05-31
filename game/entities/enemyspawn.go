@@ -2,7 +2,6 @@ package entities
 
 import (
 	"github.com/LokiTheMango/jatdg/game/level"
-	"github.com/LokiTheMango/jatdg/game/render"
 )
 
 type EnemySpawn struct {
@@ -10,7 +9,6 @@ type EnemySpawn struct {
 	y       int
 	removed bool
 	level   level.Level
-	sprite  render.Sprite
 }
 
 func NewEnemySpawn(x int, y int) Entity {
