@@ -11,17 +11,22 @@ type EnemySpawn struct {
 	level   level.Level
 	time    int
 	ready   bool
+	index   int
 }
 
-func NewEnemySpawn(x int, y int) Entity {
+func NewEnemySpawn(x int, y int, index int) Entity {
 	return &EnemySpawn{
 		x:     x,
 		y:     y,
 		time:  0,
 		ready: false,
+		index: index,
 	}
 }
 
+func (enemySpawn *EnemySpawn) GetIndex() int {
+	return enemySpawn.index
+}
 func (enemySpawn *EnemySpawn) Update() {
 	enemySpawn.time++
 	if enemySpawn.time > 1000 {
@@ -31,6 +36,9 @@ func (enemySpawn *EnemySpawn) Update() {
 }
 func (enemySpawn *EnemySpawn) ReadyCheck() bool {
 	return enemySpawn.ready
+}
+func (enemySpawn *EnemySpawn) Unready() {
+	enemySpawn.ready = false
 }
 func (enemySpawn *EnemySpawn) GetX() int {
 	return enemySpawn.x

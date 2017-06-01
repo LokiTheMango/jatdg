@@ -11,16 +11,21 @@ type Tower struct {
 	tile    *tiles.Tile
 	time    int
 	ready   bool
+	index   int
 }
 
-func NewTower(tile *tiles.Tile) Entity {
+func NewTower(tile *tiles.Tile, index int) Entity {
 	return &Tower{
 		tile:  tile,
 		time:  0,
 		ready: false,
+		index: index,
 	}
 }
 
+func (tower *Tower) GetIndex() int {
+	return tower.index
+}
 func (tower *Tower) Update() {
 	tower.time++
 	if tower.time > 60 {
@@ -30,6 +35,9 @@ func (tower *Tower) Update() {
 }
 func (tower *Tower) ReadyCheck() bool {
 	return tower.ready
+}
+func (tower *Tower) Unready() {
+	tower.ready = false
 }
 func (tower *Tower) GetX() int {
 	return tower.tile.X

@@ -9,18 +9,24 @@ type Enemy struct {
 	removed bool
 	level   level.Level
 	tile    *tiles.Tile
-	X       int
-	Y       int
+	X, Y    int
+	hp      int
+	index   int
 }
 
-func NewEnemy(tile *tiles.Tile) Mob {
+func NewEnemy(tile *tiles.Tile, index int, hp int) Mob {
 	return &Enemy{
-		tile: tile,
-		X:    tile.X << 7,
-		Y:    tile.Y << 5,
+		tile:    tile,
+		X:       tile.X << 7,
+		Y:       tile.Y << 5,
+		removed: false,
+		index:   index,
 	}
 }
 
+func (enemy *Enemy) GetIndex() int {
+	return enemy.index
+}
 func (enemy *Enemy) Move(xa int, ya int) {
 	enemy.X += xa
 	enemy.Y += ya
@@ -34,9 +40,15 @@ func (enemy *Enemy) GetY() int {
 func (enemy *Enemy) GetTile() *tiles.Tile {
 	return enemy.tile
 }
+func (enemy *Enemy) Hit(dmg int) {
+	enemy.hp -= dmg
+	if enemy.hp <= 0 {
+		enemy.Remove()
+	}
+}
 func (enemy *Enemy) Remove() {
-
+	enemy.removed = true
 }
 func (enemy *Enemy) IsRemoved() bool {
-	return false
+	return enemy.removed
 }

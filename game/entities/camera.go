@@ -6,16 +6,22 @@ import (
 )
 
 type Camera struct {
-	x       int
-	y       int
+	x, y    int
 	removed bool
 	level   *level.Level
+	index   int
 }
 
-func NewCamera(level *level.Level) Mob {
+func NewCamera(level *level.Level, index int) Mob {
 	return &Camera{
-		level: level,
+		level:   level,
+		removed: false,
+		index:   index,
 	}
+}
+
+func (camera *Camera) GetIndex() int {
+	return camera.index
 }
 
 func (camera *Camera) Move(xa int, ya int) {
@@ -31,9 +37,12 @@ func (camera *Camera) GetY() int {
 func (camera *Camera) GetTile() *tiles.Tile {
 	return &tiles.Tile{}
 }
-func (camera *Camera) Remove() {
+func (camera *Camera) Hit(dmg int) {
 
 }
+func (camera *Camera) Remove() {
+	camera.removed = true
+}
 func (camera *Camera) IsRemoved() bool {
-	return false
+	return camera.removed
 }

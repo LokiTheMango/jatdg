@@ -46,7 +46,7 @@ func (game *Game) Init(filePath string) {
 	level, towerTiles, spawnTiles := level.NewLevel(game.screen.SpriteSheet, filePath+"level.png")
 	game.level = level
 	game.screen.SetLevel(&game.level)
-	game.camera = entities.NewCamera(&game.level)
+	game.camera = entities.NewCamera(&game.level, 1)
 	game.createTowerEntities(towerTiles)
 	game.createSpawnerEntities(spawnTiles)
 	game.Enemies = make(map[int]entities.Mob)
@@ -60,7 +60,7 @@ func (game *Game) createTowerEntities(tiles []*tiles.Tile) {
 		if tiles[j] == nil {
 			continue
 		}
-		game.Towers[i] = entities.NewTower(tiles[j])
+		game.Towers[i] = entities.NewTower(tiles[j], i)
 		i++
 	}
 }
@@ -72,7 +72,7 @@ func (game *Game) createSpawnerEntities(tiles []*tiles.Tile) {
 		if tiles[j] == nil {
 			continue
 		}
-		game.Spawns[i] = entities.NewEnemySpawn(tiles[j].X, tiles[j].Y)
+		game.Spawns[i] = entities.NewEnemySpawn(tiles[j].X, tiles[j].Y, i)
 		i++
 	}
 }
@@ -88,6 +88,8 @@ func (game *Game) Update() {
 	}
 	game.moveObjects()
 	game.firingProjectiles()
+	game.hitCheck()
+	game.removeDeadObjects()
 	game.clearScreen()
 	game.render()
 	for _, enemy := range game.Enemies {
@@ -101,15 +103,16 @@ func (game *Game) Update() {
 }
 
 func (game *Game) spawnEnemies() {
-	if game.numEnemies < 1 {
+	if game.numEnemies < 10 {
 		for _, spawn := range game.Spawns {
 			if spawn.ReadyCheck() {
 				fmt.Println("created Enemy")
 				x := spawn.GetX()
 				y := spawn.GetY()
 				tile := game.level.CreateEnemy(x, y)
-				game.Enemies[game.numEnemies] = entities.NewEnemy(tile)
+				game.Enemies[game.numEnemies] = entities.NewEnemy(tile, game.numEnemies, 10)
 				game.numEnemies++
+				spawn.Unready()
 			}
 		}
 	}
@@ -187,6 +190,7 @@ func (game *Game) firingProjectiles() {
 					fmt.Println("shooting")
 					fmt.Println(alpha * (180 / math.Pi))
 					game.shoot(tower.GetX(), tower.GetY(), alpha)
+					tower.Unready()
 				}
 			}
 		}
@@ -195,7 +199,39 @@ func (game *Game) firingProjectiles() {
 
 func (game *Game) shoot(x int, y int, angle float64) {
 	tile := game.level.CreateProjectile(x, y)
-	game.Projectiles[game.numProjectiles] = entities.NewProjectile(tile, angle, 4)
+	game.Projectiles[game.numProjectiles] = entities.NewProjectile(tile, game.numProjectiles, angle, 1, 100)
+	game.numProjectiles++
+}
+
+func (game *Game) hitCheck() {
+	for _, projectile := range game.Projectiles {
+		x := float64(projectile.GetX()<<5) + enums.WIDTH_TILE/2
+		y := float64(projectile.GetY()<<5) + enums.HEIGHT_TILE/2
+		for _, enemy := range game.Enemies {
+			xa := float64(enemy.GetX()/4 + enums.WIDTH_TILE/2)
+			ya := float64(enemy.GetY() + enums.HEIGHT_TILE/2)
+			check := math.Abs(x-xa) <= 10 || math.Abs(y-ya) <= 10
+			if check {
+				projectile.Hit(1000)
+				enemy.Hit(10)
+			}
+		}
+	}
+}
+
+func (game *Game) removeDeadObjects() {
+	for _, projectile := range game.Projectiles {
+		if projectile.IsRemoved() {
+			delete(game.Projectiles, projectile.GetIndex())
+			game.numProjectiles--
+		}
+	}
+	for _, enemy := range game.Enemies {
+		if enemy.IsRemoved() {
+			delete(game.Enemies, enemy.GetIndex())
+			game.numEnemies--
+		}
+	}
 }
 
 func (game *Game) UpdateInput(newInput input.Keyboard) {
