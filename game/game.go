@@ -20,6 +20,7 @@ type Game struct {
 	Towers        []entities.Entity
 	Spawns        []entities.Entity
 	Enemies       []entities.Mob
+	Projectiles   []entities.Mob
 	camera        entities.Mob
 	time          int
 	numEnemies    int
@@ -76,6 +77,7 @@ func (game *Game) Update() {
 		tower.Update()
 	}
 	game.moveObjects()
+	game.firingProjectiles()
 	game.clearScreen()
 	game.render()
 	for _, enemy := range game.Enemies {
@@ -137,8 +139,8 @@ func (game *Game) moveObjects() {
 func (game *Game) moveWithCollisionCheck(xa int, ya int) {
 	for _, enemy := range game.Enemies {
 		if enemy != nil {
-			x := int((float64(enemy.GetX()+xa) / 128) + 0.5)
-			y := (int((float64(enemy.GetY()+ya) / 32) + 0.5)) * game.level.Width
+			x := int((float64(enemy.GetX()+xa) / 128))
+			y := (int((float64(enemy.GetY()+ya) / 32))) * game.level.Width
 			if !game.level.Tiles[x+y].TileProperties.IsSolid {
 				fmt.Println("moving enemy")
 				enemy.Move(xa<<2, ya)
@@ -163,6 +165,24 @@ func Round(val float64, roundOn float64, places int) (newVal float64) {
 	}
 	newVal = round / pow
 	return
+}
+
+func (game *Game) firingProjectiles() {
+	for _, tower := range game.Towers {
+		x := float64(tower.GetX())
+		y := float64(tower.GetY())
+		for _, tower := range game.Enemies {
+			if enemy != nil {
+				xa := float64(enemy.GetX() / 128)
+				ya := float64(enemy.GetY() / 32)
+				xd := math.Abs(x - xa)
+				yd := math.Abs(y - ya)
+				if xd+yd > 4 {
+					alpha := math.atan(yd / xd)
+				}
+			}
+		}
+	}
 }
 
 func (game *Game) UpdateInput(newInput input.Keyboard) {

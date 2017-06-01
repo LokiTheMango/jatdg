@@ -87,6 +87,11 @@ func (level *Level) CreateEnemy(x int, y int) *tiles.Tile {
 	return &tile
 }
 
+func (level *Level) CreateProjectile(x int, y int) *tiles.Tile {
+	tile := tiles.NewTile(x, y, enums.TileType(enums.PROJECTILE), level.spriteSheet.PixelArray)
+	return &tile
+}
+
 func testEq(a, b []byte) bool {
 
 	if a == nil && b == nil {
