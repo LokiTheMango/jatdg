@@ -4,7 +4,7 @@ import "github.com/LokiTheMango/jatdg/game/tiles"
 
 type Entity interface {
 	Update()
-	Render()
+	ReadyCheck() bool
 	GetX() int
 	GetY() int
 	Remove()

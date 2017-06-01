@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 
+	"github.com/LokiTheMango/jatdg/enums"
 	"github.com/LokiTheMango/jatdg/game/entities"
 	"github.com/LokiTheMango/jatdg/game/input"
 	"github.com/LokiTheMango/jatdg/game/level"
@@ -13,27 +14,29 @@ import (
 
 // Game Object
 type Game struct {
-	screen        Screen
-	level         level.Level
-	input         input.Keyboard
-	DrawRequested bool
-	Towers        []entities.Entity
-	Spawns        []entities.Entity
-	Enemies       []entities.Mob
-	Projectiles   []entities.Mob
-	camera        entities.Mob
-	time          int
-	numEnemies    int
+	screen         Screen
+	level          level.Level
+	input          input.Keyboard
+	DrawRequested  bool
+	Towers         map[int]entities.Entity
+	Spawns         map[int]entities.Entity
+	Enemies        map[int]entities.Mob
+	Projectiles    map[int]entities.Mob
+	camera         entities.Mob
+	time           int
+	numEnemies     int
+	numProjectiles int
 }
 
 //Constructor
 func New() *Game {
 	game := &Game{
-		screen:        Screen{},
-		input:         input.Keyboard{},
-		DrawRequested: false,
-		time:          0,
-		numEnemies:    0,
+		screen:         Screen{},
+		input:          input.Keyboard{},
+		DrawRequested:  false,
+		time:           0,
+		numEnemies:     0,
+		numProjectiles: 0,
 	}
 	return game
 }
@@ -46,54 +49,61 @@ func (game *Game) Init(filePath string) {
 	game.camera = entities.NewCamera(&game.level)
 	game.createTowerEntities(towerTiles)
 	game.createSpawnerEntities(spawnTiles)
-	game.Enemies = make([]entities.Mob, 500)
+	game.Enemies = make(map[int]entities.Mob)
+	game.Projectiles = make(map[int]entities.Mob)
 }
 
 func (game *Game) createTowerEntities(tiles []*tiles.Tile) {
-	game.Towers = make([]entities.Entity, game.level.NumTowers)
-	j := 0
-	for i, _ := range game.Towers {
-		for tiles[j] == nil {
-			j++
+	game.Towers = make(map[int]entities.Entity)
+	i := 0
+	for j := 0; j < len(tiles); j++ {
+		if tiles[j] == nil {
+			continue
 		}
 		game.Towers[i] = entities.NewTower(tiles[j])
-		j++
+		i++
 	}
 }
 
 func (game *Game) createSpawnerEntities(tiles []*tiles.Tile) {
-	game.Spawns = make([]entities.Entity, game.level.NumEnemySpawn)
-	j := 0
-	for i, _ := range game.Spawns {
-		for tiles[j] == nil {
-			j++
+	game.Spawns = make(map[int]entities.Entity)
+	i := 0
+	for j := 0; j < len(tiles); j++ {
+		if tiles[j] == nil {
+			continue
 		}
 		game.Spawns[i] = entities.NewEnemySpawn(tiles[j].X, tiles[j].Y)
+		i++
 	}
 }
 
 func (game *Game) Update() {
+	game.time++
 	game.spawnEnemies()
 	for _, tower := range game.Towers {
 		tower.Update()
+	}
+	for _, spawn := range game.Spawns {
+		spawn.Update()
 	}
 	game.moveObjects()
 	game.firingProjectiles()
 	game.clearScreen()
 	game.render()
 	for _, enemy := range game.Enemies {
-		if enemy != nil {
-			tile := *enemy.GetTile()
-			game.screen.RenderMob(enemy.GetX(), enemy.GetY(), tile)
-		}
+		tile := *enemy.GetTile()
+		game.screen.RenderMob(enemy.GetX(), enemy.GetY(), tile)
+	}
+	for _, projectile := range game.Projectiles {
+		tile := *projectile.GetTile()
+		game.screen.RenderMob(projectile.GetX(), projectile.GetY(), tile)
 	}
 }
 
 func (game *Game) spawnEnemies() {
-	game.time++
-	if game.time%1000 == 0 && game.numEnemies < 1 {
+	if game.numEnemies < 1 {
 		for _, spawn := range game.Spawns {
-			if spawn != nil {
+			if spawn.ReadyCheck() {
 				fmt.Println("created Enemy")
 				x := spawn.GetX()
 				y := spawn.GetY()
@@ -116,6 +126,9 @@ func (game *Game) clearScreen() {
 }
 
 func (game *Game) moveObjects() {
+	for _, projectile := range game.Projectiles {
+		projectile.Move(0, 0)
+	}
 	xOffset := 0
 	yOffset := 0
 	if game.input.Up {
@@ -139,14 +152,12 @@ func (game *Game) moveObjects() {
 
 func (game *Game) moveWithCollisionCheck(xa int, ya int) {
 	for _, enemy := range game.Enemies {
-		if enemy != nil {
-			x := int((float64(enemy.GetX()+xa) / 128))
-			x2 := int((float64(enemy.GetX()+127+xa) / 128))
-			y := (int((float64(enemy.GetY()+ya) / 32))) * game.level.Width
-			y2 := (int((float64(enemy.GetY()+31+ya) / 32))) * game.level.Width
-			if !game.collisionCheckForTile(x, x2, y, y2) {
-				enemy.Move(xa<<2, ya)
-			}
+		x := int((float64(enemy.GetX()+xa) / 128))
+		x2 := int((float64(enemy.GetX()+127+xa) / 128))
+		y := (int((float64(enemy.GetY()+ya) / 32))) * game.level.Width
+		y2 := (int((float64(enemy.GetY()+31+ya) / 32))) * game.level.Width
+		if !game.collisionCheckForTile(x, x2, y, y2) {
+			enemy.Move(xa<<2, ya)
 		}
 	}
 }
@@ -160,69 +171,31 @@ func (game *Game) collisionCheckForTile(x1 int, x2 int, y1 int, y2 int) bool {
 	return collision
 }
 
-func Round(val float64, roundOn float64, places int) (newVal float64) {
-	var round float64
-	pow := math.Pow(10, float64(places))
-	digit := pow * val
-	_, div := math.Modf(digit)
-	if div >= roundOn {
-		round = math.Ceil(digit)
-	} else {
-		round = math.Floor(digit)
-	}
-	newVal = round / pow
-	return
-}
-
 func (game *Game) firingProjectiles() {
 	for _, tower := range game.Towers {
-		x := float64(tower.GetX())
-		y := float64(tower.GetY())
+		x := float64(tower.GetX()<<5) + enums.WIDTH_TILE/2
+		y := float64(tower.GetY()<<5) + enums.HEIGHT_TILE/2
 		for _, enemy := range game.Enemies {
-			if enemy != nil {
-				xa := float64(enemy.GetX() / 128)
-				ya := float64(enemy.GetY() / 32)
+			if tower.ReadyCheck() {
+				xa := float64(enemy.GetX()/4 + enums.WIDTH_TILE/2)
+				ya := float64(enemy.GetY() + enums.HEIGHT_TILE/2)
 				xd := x - xa
 				yd := y - ya
 				check := math.Abs(xd) + math.Abs(yd)
-				if check >= 4 {
-					alpha := game.calculateAngle(xd, yd)
-					if alpha != 0 {
-						fmt.Println(alpha)
-					}
+				if check <= 128 {
+					alpha := math.Atan2(yd, xd)
+					fmt.Println("shooting")
+					fmt.Println(alpha * (180 / math.Pi))
+					game.shoot(tower.GetX(), tower.GetY(), alpha)
 				}
 			}
 		}
 	}
 }
 
-func (game *Game) calculateAngle(xd float64, yd float64) float64 {
-	angle := 0.0
-	if xd == 0 || yd == 0 {
-		if xd == 0 {
-			if yd > 0 {
-				angle = 90
-			} else {
-				angle = 270
-			}
-		}
-		if yd == 0 {
-			if xd > 0 {
-				angle = 180
-			} else {
-				angle = 0
-			}
-		}
-	} else {
-		if xd > yd {
-
-		}
-		if yd > xd {
-
-		}
-	}
-
-	return angle
+func (game *Game) shoot(x int, y int, angle float64) {
+	tile := game.level.CreateProjectile(x, y)
+	game.Projectiles[game.numProjectiles] = entities.NewProjectile(tile, angle, 4)
 }
 
 func (game *Game) UpdateInput(newInput input.Keyboard) {

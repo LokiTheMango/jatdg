@@ -1,53 +1,48 @@
 package entities
 
 import (
+	"math"
+
 	"github.com/LokiTheMango/jatdg/game/tiles"
 )
 
 type Projectile struct {
 	removed bool
 	tile    *tiles.Tile
-	X       int
-	Y       int
+	X, Y    int
 	Angle   float64
-	xa      int
-	ya      int
+	xa, ya  float64
+	speed   int
 }
 
-func NewProjectile(tile *tiles.Tile, angle float64) Mob {
+func NewProjectile(tile *tiles.Tile, angle float64, speed int) Mob {
 	return &Projectile{
 		tile:  tile,
 		X:     tile.X << 7,
 		Y:     tile.Y << 5,
 		Angle: angle,
-		xa:    0,
-		ya:    0,
+		speed: speed,
+		xa:    float64(speed) * math.Cos(angle),
+		ya:    float64(speed) * math.Sin(angle),
 	}
 }
 
-func (Projectile *Projectile) Move(x int, y int) {
-	/*if angle / 2 ==  {
-
-	} else {
-
-	}
-	xd :=
-	yd :=
-	Projectile.X += xd
-	Projectile.Y += yd*/
+func (projectile *Projectile) Move(x int, y int) {
+	projectile.X -= int(projectile.xa) << 2
+	projectile.Y -= int(projectile.ya)
 }
-func (Projectile *Projectile) GetX() int {
-	return Projectile.X
+func (projectile *Projectile) GetX() int {
+	return projectile.X
 }
-func (Projectile *Projectile) GetY() int {
-	return Projectile.Y
+func (projectile *Projectile) GetY() int {
+	return projectile.Y
 }
-func (Projectile *Projectile) GetTile() *tiles.Tile {
-	return Projectile.tile
+func (projectile *Projectile) GetTile() *tiles.Tile {
+	return projectile.tile
 }
-func (Projectile *Projectile) Remove() {
+func (projectile *Projectile) Remove() {
 
 }
-func (Projectile *Projectile) IsRemoved() bool {
+func (projectile *Projectile) IsRemoved() bool {
 	return false
 }
