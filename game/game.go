@@ -57,6 +57,7 @@ func (game *Game) createTowerEntities(tiles []*tiles.Tile) {
 			j++
 		}
 		game.Towers[i] = entities.NewTower(tiles[j])
+		j++
 	}
 }
 
@@ -90,7 +91,7 @@ func (game *Game) Update() {
 
 func (game *Game) spawnEnemies() {
 	game.time++
-	if game.time%1000 == 0 {
+	if game.time%1000 == 0 && game.numEnemies < 1 {
 		for _, spawn := range game.Spawns {
 			if spawn != nil {
 				fmt.Println("created Enemy")
@@ -177,7 +178,7 @@ func (game *Game) firingProjectiles() {
 				xd := x - xa
 				yd := y - ya
 				check := math.Abs(xd) + math.Abs(yd)
-				if check > 4 {
+				if check >= 4 {
 					alpha := game.calculateAngle(xd, yd)
 					if alpha != 0 {
 						fmt.Println(alpha)
