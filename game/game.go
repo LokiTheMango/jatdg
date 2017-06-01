@@ -142,7 +142,6 @@ func (game *Game) moveWithCollisionCheck(xa int, ya int) {
 			x := int((float64(enemy.GetX()+xa) / 128))
 			y := (int((float64(enemy.GetY()+ya) / 32))) * game.level.Width
 			if !game.level.Tiles[x+y].TileProperties.IsSolid {
-				fmt.Println("moving enemy")
 				enemy.Move(xa<<2, ya)
 			} else {
 				fmt.Println("solid tile")
@@ -171,18 +170,51 @@ func (game *Game) firingProjectiles() {
 	for _, tower := range game.Towers {
 		x := float64(tower.GetX())
 		y := float64(tower.GetY())
-		for _, tower := range game.Enemies {
+		for _, enemy := range game.Enemies {
 			if enemy != nil {
 				xa := float64(enemy.GetX() / 128)
 				ya := float64(enemy.GetY() / 32)
-				xd := math.Abs(x - xa)
-				yd := math.Abs(y - ya)
-				if xd+yd > 4 {
-					alpha := math.atan(yd / xd)
+				xd := x - xa
+				yd := y - ya
+				check := math.Abs(xd) + math.Abs(yd)
+				if check > 4 {
+					alpha := game.calculateAngle(xd, yd)
+					if alpha != 0 {
+						fmt.Println(alpha)
+					}
 				}
 			}
 		}
 	}
+}
+
+func (game *Game) calculateAngle(xd float64, yd float64) float64 {
+	angle := 0.0
+	if xd == 0 || yd == 0 {
+		if xd == 0 {
+			if yd > 0 {
+				angle = 90
+			} else {
+				angle = 270
+			}
+		}
+		if yd == 0 {
+			if xd > 0 {
+				angle = 180
+			} else {
+				angle = 0
+			}
+		}
+	} else {
+		if xd > yd {
+
+		}
+		if yd > xd {
+
+		}
+	}
+
+	return angle
 }
 
 func (game *Game) UpdateInput(newInput input.Keyboard) {
