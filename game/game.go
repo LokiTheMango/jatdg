@@ -141,16 +141,23 @@ func (game *Game) moveWithCollisionCheck(xa int, ya int) {
 	for _, enemy := range game.Enemies {
 		if enemy != nil {
 			x := int((float64(enemy.GetX()+xa) / 128))
+			x2 := int((float64(enemy.GetX()+127+xa) / 128))
 			y := (int((float64(enemy.GetY()+ya) / 32))) * game.level.Width
-			if !game.level.Tiles[x+y].TileProperties.IsSolid {
+			y2 := (int((float64(enemy.GetY()+31+ya) / 32))) * game.level.Width
+			if !game.collisionCheckForTile(x, x2, y, y2) {
 				enemy.Move(xa<<2, ya)
-			} else {
-				fmt.Println("solid tile")
-				fmt.Println(game.level.Tiles[x+y].X)
-				fmt.Println(game.level.Tiles[x+y].Y)
 			}
 		}
 	}
+}
+
+func (game *Game) collisionCheckForTile(x1 int, x2 int, y1 int, y2 int) bool {
+	collision := false
+	collision = game.level.Tiles[x1+y1].TileProperties.IsSolid || collision
+	collision = game.level.Tiles[x1+y2].TileProperties.IsSolid || collision
+	collision = game.level.Tiles[x2+y1].TileProperties.IsSolid || collision
+	collision = game.level.Tiles[x2+y2].TileProperties.IsSolid || collision
+	return collision
 }
 
 func Round(val float64, roundOn float64, places int) (newVal float64) {
