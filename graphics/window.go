@@ -150,7 +150,7 @@ func InitWindowLoop(windowTitle string, windowWidth int, windowHeight int, frame
 				scaleFacX := float64(szRect.Max.X) / float64(tex.Bounds().Max.X)
 				scaleFacY := float64(szRect.Max.Y) / float64(tex.Bounds().Max.Y)
 				scaleFac := scaleFacX
-				if scaleFac < scaleFacY {
+				if scaleFac > scaleFacY {
 					scaleFac = scaleFacY
 				}
 

@@ -22,7 +22,7 @@ func main() {
 	exPath := path.Dir(dir)
 	fmt.Println(exPath)
 	game := game.New()
-	graphics.InitWindowLoop("GAME", 160*4, 160*4, 320, 320, func(sharedWindow *graphics.Window) {
+	graphics.InitWindowLoop("GAME", 640, 640, 320, 320, func(sharedWindow *graphics.Window) {
 		startGame(sharedWindow, game, exPath)
 	})
 
