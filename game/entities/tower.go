@@ -28,7 +28,7 @@ func (tower *Tower) GetIndex() int {
 }
 func (tower *Tower) Update() {
 	tower.time++
-	if tower.time > 60 {
+	if tower.time > 120 {
 		tower.ready = true
 		tower.time = 0
 	}

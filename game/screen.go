@@ -95,10 +95,11 @@ func (screen *Screen) RenderMob(xp int, yp int, tile tiles.Tile) {
 	xp -= screen.xOffset
 	yp -= screen.yOffset
 	tilePixels := tile.GetPixelArray()
+	invisPix := []byte{255, 0, 255, 255}
 	for y := 0; y < enums.HEIGHT_TILE; y++ {
 		ya := y + yp
-		for x := 0; x < enums.WIDTH_TILE; x++ {
-			xa := x + xp
+		for x := 0; x < enums.HEIGHT_TILE; x++ {
+			xa := x*4 + xp
 			if xa < (-1*enums.WIDTH_TILE) || xa >= enums.WIDTH || ya < 0 || ya >= enums.HEIGHT {
 				break
 			}
@@ -106,8 +107,13 @@ func (screen *Screen) RenderMob(xp int, yp int, tile tiles.Tile) {
 				xa = 0
 			}
 			indexPix := xa + ya*enums.WIDTH
-			indexTilePix := x + y*enums.WIDTH_TILE
-			screen.PixelArray[indexPix] = tilePixels[indexTilePix]
+			indexTilePix := x*4 + y*enums.WIDTH_TILE
+			tilePixelCheck := tilePixels[indexTilePix : indexTilePix+4]
+			if !testEq(tilePixelCheck, invisPix) {
+				for i := 0; i < 4; i++ {
+					screen.PixelArray[indexPix+i] = tilePixels[indexTilePix+i]
+				}
+			}
 		}
 	}
 }
@@ -126,4 +132,27 @@ func (screen *Screen) ClearScreen() {
 	for i := 0; i < len(screen.PixelArray); i++ {
 		screen.PixelArray[i] = 0
 	}
+}
+
+func testEq(a, b []byte) bool {
+
+	if a == nil && b == nil {
+		return true
+	}
+
+	if a == nil || b == nil {
+		return false
+	}
+
+	if len(a) != len(b) {
+		return false
+	}
+
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+
+	return true
 }

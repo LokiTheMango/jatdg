@@ -199,18 +199,19 @@ func (game *Game) firingProjectiles() {
 
 func (game *Game) shoot(x int, y int, angle float64) {
 	tile := game.level.CreateProjectile(x, y)
-	game.Projectiles[game.numProjectiles] = entities.NewProjectile(tile, game.numProjectiles, angle, 1, 100)
+	game.Projectiles[game.numProjectiles] = entities.NewProjectile(tile, game.numProjectiles, angle, 4, 100)
 	game.numProjectiles++
 }
 
 func (game *Game) hitCheck() {
 	for _, projectile := range game.Projectiles {
-		x := float64(projectile.GetX()<<5) + enums.WIDTH_TILE/2
-		y := float64(projectile.GetY()<<5) + enums.HEIGHT_TILE/2
+		x := float64(projectile.GetX()/4) + enums.HEIGHT_TILE/2
+		y := float64(projectile.GetY()) + enums.HEIGHT_TILE/2
 		for _, enemy := range game.Enemies {
-			xa := float64(enemy.GetX()/4 + enums.WIDTH_TILE/2)
+			xa := float64(enemy.GetX()/4 + enums.HEIGHT_TILE/2)
 			ya := float64(enemy.GetY() + enums.HEIGHT_TILE/2)
-			check := math.Abs(x-xa) <= 10 || math.Abs(y-ya) <= 10
+			//Hit Box == circle over center (radius 10px)
+			check := math.Abs(x-xa) <= 10 && math.Abs(y-ya) <= 10
 			if check {
 				projectile.Hit(1000)
 				enemy.Hit(10)

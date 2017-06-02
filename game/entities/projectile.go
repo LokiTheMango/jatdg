@@ -35,6 +35,16 @@ func (projectile *Projectile) GetIndex() int {
 	return projectile.index
 }
 func (projectile *Projectile) Move(x int, y int) {
+	/*if projectile.xa > 0 {
+		projectile.xa += 0.5
+	} else {
+		projectile.xa -= 0.5
+	}
+	if projectile.ya > 0 {
+		projectile.ya += 0.5
+	} else {
+		projectile.ya -= 0.5
+	}*/
 	projectile.X -= int(projectile.xa) << 2
 	projectile.Y -= int(projectile.ya)
 	projectile.Hit(1)
