@@ -1,6 +1,9 @@
 package entities
 
-import "github.com/LokiTheMango/jatdg/game/tiles"
+import (
+	"github.com/LokiTheMango/jatdg/game/pathing"
+	"github.com/LokiTheMango/jatdg/game/tiles"
+)
 
 type Entity interface {
 	GetIndex() int
@@ -15,6 +18,7 @@ type Entity interface {
 
 type Mob interface {
 	GetIndex() int
+	SetPath(path []pathing.Node)
 	GetX() int
 	GetY() int
 	GetTile() *tiles.Tile

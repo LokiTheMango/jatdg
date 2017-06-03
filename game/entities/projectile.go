@@ -3,6 +3,7 @@ package entities
 import (
 	"math"
 
+	"github.com/LokiTheMango/jatdg/game/pathing"
 	"github.com/LokiTheMango/jatdg/game/tiles"
 )
 
@@ -34,6 +35,11 @@ func NewProjectile(tile *tiles.Tile, index int, angle float64, speed int, hp int
 func (projectile *Projectile) GetIndex() int {
 	return projectile.index
 }
+
+func (projectile *Projectile) SetPath(path []pathing.Node) {
+
+}
+
 func (projectile *Projectile) Move(x int, y int) {
 	/*if projectile.xa > 0 {
 		projectile.xa += 0.5

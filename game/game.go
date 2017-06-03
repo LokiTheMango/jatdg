@@ -8,16 +8,19 @@ import (
 	"github.com/LokiTheMango/jatdg/game/entities"
 	"github.com/LokiTheMango/jatdg/game/input"
 	"github.com/LokiTheMango/jatdg/game/level"
+	"github.com/LokiTheMango/jatdg/game/pathing"
 	"github.com/LokiTheMango/jatdg/game/render"
 	"github.com/LokiTheMango/jatdg/game/tiles"
 )
 
 // Game Object
 type Game struct {
+	lives          int
 	screen         Screen
 	level          level.Level
 	input          input.Keyboard
 	DrawRequested  bool
+	Goals          map[int]entities.Entity
 	Towers         map[int]entities.Entity
 	Spawns         map[int]entities.Entity
 	Enemies        map[int]entities.Mob
@@ -31,6 +34,7 @@ type Game struct {
 //Constructor
 func New() *Game {
 	game := &Game{
+		lives:          20,
 		screen:         Screen{},
 		input:          input.Keyboard{},
 		DrawRequested:  false,
@@ -43,14 +47,27 @@ func New() *Game {
 
 func (game *Game) Init(filePath string) {
 	game.screen = NewScreen(filePath + "tiles.png")
-	level, towerTiles, spawnTiles := level.NewLevel(game.screen.SpriteSheet, filePath+"level.png")
+	level, towerTiles, spawnTiles, goalTiles := level.NewLevel(game.screen.SpriteSheet, filePath+"level.png")
 	game.level = level
 	game.screen.SetLevel(&game.level)
 	game.camera = entities.NewCamera(&game.level, 1)
+	game.createGoalEntities(goalTiles)
 	game.createTowerEntities(towerTiles)
 	game.createSpawnerEntities(spawnTiles)
 	game.Enemies = make(map[int]entities.Mob)
 	game.Projectiles = make(map[int]entities.Mob)
+}
+
+func (game *Game) createGoalEntities(tiles []*tiles.Tile) {
+	game.Goals = make(map[int]entities.Entity)
+	i := 0
+	for j := 0; j < len(tiles); j++ {
+		if tiles[j] == nil {
+			continue
+		}
+		game.Goals[i] = entities.NewGoal(tiles[j], i)
+		i++
+	}
 }
 
 func (game *Game) createTowerEntities(tiles []*tiles.Tile) {
@@ -78,6 +95,7 @@ func (game *Game) createSpawnerEntities(tiles []*tiles.Tile) {
 }
 
 func (game *Game) Update() {
+	game.checkGoalHit()
 	game.time++
 	game.spawnEnemies()
 	for _, tower := range game.Towers {
@@ -102,6 +120,24 @@ func (game *Game) Update() {
 	}
 }
 
+func (game *Game) checkGoalHit() {
+	for _, goal := range game.Goals {
+		x := float64(goal.GetX()/4 + enums.HEIGHT_TILE/2)
+		y := float64(goal.GetY() + enums.HEIGHT_TILE/2)
+		for _, enemy := range game.Enemies {
+			xa := float64(enemy.GetX()/4 + enums.HEIGHT_TILE/2)
+			ya := float64(enemy.GetY() + enums.HEIGHT_TILE/2)
+			//Hit Box == circle over center (radius 10px)
+			check := math.Abs(x-xa) <= 10 && math.Abs(y-ya) <= 10
+			if check {
+				game.lives--
+				fmt.Println("GOAL HIT !!! LIVE DOWN")
+				fmt.Println(game.lives)
+			}
+		}
+	}
+}
+
 func (game *Game) spawnEnemies() {
 	if game.numEnemies < 10 {
 		for _, spawn := range game.Spawns {
@@ -110,12 +146,24 @@ func (game *Game) spawnEnemies() {
 				x := spawn.GetX()
 				y := spawn.GetY()
 				tile := game.level.CreateEnemy(x, y)
-				game.Enemies[game.numEnemies] = entities.NewEnemy(tile, game.numEnemies, 10)
+				enemy := entities.NewEnemy(tile, game.numEnemies, 10)
+				game.updateEnemyPath(enemy)
+				game.Enemies[game.numEnemies] = enemy
 				game.numEnemies++
 				spawn.Unready()
 			}
 		}
 	}
+}
+
+func (game *Game) updateEnemyPath(enemy entities.Mob) {
+	gx := game.Goals[0].GetX()
+	gy := game.Goals[0].GetY()
+	destination := pathing.NewVector2i(gx, gy)
+	ex := (enemy.GetX() + enums.WIDTH_TILE/2) >> 7
+	ey := (enemy.GetY() + enums.HEIGHT_TILE/2) >> 5
+	start := pathing.NewVector2i(ex, ey)
+	enemy.SetPath(game.level.FindPath(start, destination))
 }
 
 func (game *Game) render() {
@@ -148,19 +196,25 @@ func (game *Game) moveObjects() {
 	}
 	if xOffset != 0 || yOffset != 0 {
 		game.camera.Move(xOffset, yOffset)
-		game.moveWithCollisionCheck(xOffset, 0)
-		game.moveWithCollisionCheck(0, yOffset)
+		game.moveWithCollisionCheck()
 	}
 }
 
-func (game *Game) moveWithCollisionCheck(xa int, ya int) {
+func (game *Game) moveWithCollisionCheck() {
+	update := false
+	if game.time%60 == 0 {
+		update = true
+	}
 	for _, enemy := range game.Enemies {
-		x := int((float64(enemy.GetX()+xa) / 128))
-		x2 := int((float64(enemy.GetX()+127+xa) / 128))
-		y := (int((float64(enemy.GetY()+ya) / 32))) * game.level.Width
-		y2 := (int((float64(enemy.GetY()+31+ya) / 32))) * game.level.Width
+		if update {
+			game.updateEnemyPath(enemy)
+		}
+		x := int((float64(enemy.GetX()) / 128))
+		x2 := int((float64(enemy.GetX()+127) / 128))
+		y := (int((float64(enemy.GetY()) / 32))) * game.level.Width
+		y2 := (int((float64(enemy.GetY()+31) / 32))) * game.level.Width
 		if !game.collisionCheckForTile(x, x2, y, y2) {
-			enemy.Move(xa<<2, ya)
+			enemy.Move(0, 0)
 		}
 	}
 }

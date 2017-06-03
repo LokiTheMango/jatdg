@@ -2,6 +2,7 @@ package entities
 
 import (
 	"github.com/LokiTheMango/jatdg/game/level"
+	"github.com/LokiTheMango/jatdg/game/pathing"
 	"github.com/LokiTheMango/jatdg/game/tiles"
 )
 
@@ -22,6 +23,10 @@ func NewCamera(level *level.Level, index int) Mob {
 
 func (camera *Camera) GetIndex() int {
 	return camera.index
+}
+
+func (camera *Camera) SetPath(path []pathing.Node) {
+
 }
 
 func (camera *Camera) Move(xa int, ya int) {

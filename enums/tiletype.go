@@ -8,4 +8,5 @@ const (
 	TOWER      = iota
 	ENEMY      = iota
 	PROJECTILE = iota
+	GOAL       = iota
 )
