@@ -177,6 +177,7 @@ func (game *Game) clearScreen() {
 }
 
 func (game *Game) moveObjects() {
+	game.moveWithCollisionCheck()
 	for _, projectile := range game.Projectiles {
 		projectile.Move(0, 0)
 	}
@@ -196,7 +197,6 @@ func (game *Game) moveObjects() {
 	}
 	if xOffset != 0 || yOffset != 0 {
 		game.camera.Move(xOffset, yOffset)
-		game.moveWithCollisionCheck()
 	}
 }
 

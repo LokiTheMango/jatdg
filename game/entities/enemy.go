@@ -44,16 +44,16 @@ func (enemy *Enemy) Move(xa int, ya int) {
 			if enemy.X > vx<<7 {
 				xa--
 			}
-			if enemy.Y < vy<<7 {
+			if enemy.Y < vy<<5 {
 				ya++
 			}
-			if enemy.Y < vy<<7 {
+			if enemy.Y > vy<<5 {
 				ya--
 			}
 		}
 	}
-	enemy.X += xa
-	enemy.X += xa
+	enemy.X += xa << 2
+	enemy.Y += ya
 }
 func (enemy *Enemy) GetX() int {
 	return enemy.X
