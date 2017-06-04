@@ -149,6 +149,9 @@ func (level *Level) FindPath(start pathing.Vector2i, goal pathing.Vector2i) []pa
 		}
 		openList = openList[1:]
 		closedList = append(closedList, current)
+		// NO NEED FOR DIAGONALS
+		// DIAGONALS IMPLEMENTED BY CHECKING 9 FIELDS
+		// xi=i%3-1 yi=i/3-1
 		for i := 0; i < 9; i++ {
 			if i == 4 {
 				continue
@@ -156,6 +159,9 @@ func (level *Level) FindPath(start pathing.Vector2i, goal pathing.Vector2i) []pa
 			x, y := current.Tile.GetXY()
 			xi := (i % 3) - 1
 			yi := (i / 3) - 1
+			if (xi == -1 && yi == -1) || (xi == 1 && yi == 1) || (xi == -1 && yi == 1) || (xi == 1 && yi == -1) {
+				xi, yi = 0, 0
+			}
 			at := level.Tiles[(x+xi)+(y+yi)*level.Width]
 			if &at == nil || at.TileProperties.IsSolid {
 				continue

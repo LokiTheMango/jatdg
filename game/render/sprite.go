@@ -7,6 +7,8 @@ import (
 type Sprite struct {
 	tileType   enums.TileType
 	PixelArray []byte
+	Width      int
+	Height     int
 }
 
 func NewSprite(pixelArray []byte, tileType enums.TileType, posX int, posY int) Sprite {
@@ -26,5 +28,21 @@ func NewSprite(pixelArray []byte, tileType enums.TileType, posX int, posY int) S
 	return Sprite{
 		tileType:   tileType,
 		PixelArray: pixel,
+	}
+}
+
+func NewColorSprite(width int, height int, color []byte) Sprite {
+	pixel := make([]byte, width*4*height)
+	for i := 0; i < height; i++ {
+		for j := 0; j < width*4; j += 4 {
+			start := j + i*width
+			end := start + 4
+			copy(pixel[start:end], color)
+		}
+	}
+	return Sprite{
+		PixelArray: pixel,
+		Width:      width,
+		Height:     height,
 	}
 }

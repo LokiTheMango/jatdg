@@ -19,6 +19,7 @@ func main() {
 		panic(err)
 	}
 	fmt.Println(dir)
+	fmt.Println([]rune("Z")[0])
 	exPath := path.Dir(dir)
 	fmt.Println(exPath)
 	game := game.New()

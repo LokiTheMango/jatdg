@@ -5,6 +5,7 @@ import (
 	"github.com/LokiTheMango/jatdg/game/level"
 	"github.com/LokiTheMango/jatdg/game/render"
 	"github.com/LokiTheMango/jatdg/game/tiles"
+	"github.com/LokiTheMango/jatdg/game/ui"
 )
 
 type Screen struct {
@@ -91,6 +92,60 @@ func (screen *Screen) RenderTile(xp int, yp int, tile tiles.Tile) {
 	}
 }
 
+func (screen *Screen) DrawRect(xp int, yp int, width int, height int, color []byte, fixed bool) {
+	xp = xp << 2
+	width = width << 2
+	if fixed {
+		xp -= screen.xOffset
+		yp -= screen.yOffset
+	}
+	pxIndex := 0
+	index := 0
+	for x := xp; x < xp+width; x += 4 {
+		if x < 0 || x >= enums.WIDTH || yp >= enums.HEIGHT {
+			continue
+		}
+		if yp > 0 {
+			index = x + yp*enums.WIDTH
+			for i := 0; i < 4; i++ {
+				screen.PixelArray[index+i] = color[i]
+			}
+		}
+		if yp+height >= enums.HEIGHT {
+			continue
+		}
+		if yp+height > 0 {
+			index = x + (yp+height)*enums.WIDTH
+			for i := 0; i < 4; i++ {
+				screen.PixelArray[index+i] = color[i]
+			}
+		}
+		pxIndex++
+	}
+	pxIndex = 0
+	for y := yp; y < yp+height; y++ {
+		if xp >= enums.WIDTH || y < 0 || y >= enums.HEIGHT {
+			continue
+		}
+		if xp > 0 {
+			index = xp + y*enums.WIDTH
+			for i := 0; i < 4; i++ {
+				screen.PixelArray[index+i] = color[i]
+			}
+		}
+		if xp+width >= enums.WIDTH {
+			continue
+		}
+		if xp+width > 0 {
+			index = (xp + width) + y*enums.WIDTH
+			for i := 0; i < 4; i++ {
+				screen.PixelArray[index+i] = color[i]
+			}
+		}
+		pxIndex++
+	}
+}
+
 func (screen *Screen) RenderMob(xp int, yp int, tile tiles.Tile) {
 	xp -= screen.xOffset
 	yp -= screen.yOffset
@@ -155,4 +210,41 @@ func testEq(a, b []byte) bool {
 	}
 
 	return true
+}
+
+func (screen *Screen) RenderSprite(xp int, yp int, sprite render.Sprite, fixed bool) {
+	xp = xp << 2
+	if fixed {
+		xp -= screen.xOffset
+		yp -= screen.yOffset
+	}
+	spritePix := sprite.PixelArray
+	height := sprite.Height
+	width := sprite.Width
+	for y := 0; y < height; y++ {
+		ya := y + yp
+		for x := 0; x < width*4; x++ {
+			xa := x + xp
+			if xa < (-1*width) || xa >= enums.WIDTH || ya < 0 || ya >= enums.HEIGHT {
+				break
+			}
+			if xa < 0 {
+				xa = 0
+			}
+			indexPix := xa + ya*enums.WIDTH
+			indexSpritePix := x + y*width
+			screen.PixelArray[indexPix] = spritePix[indexSpritePix]
+		}
+	}
+}
+
+func (screen *Screen) RenderUI(ui *ui.UIManager) {
+	for _, panel := range ui.Panels {
+		posX, posY := panel.GetPositionXY()
+		screen.RenderSprite(posX, posY, panel.Sprite, false)
+		for _, component := range panel.Components {
+			component.GetLabel()
+		}
+	}
+	screen.DrawRect(250, 50, 20, 20, []byte{255, 0, 255, 255}, false)
 }

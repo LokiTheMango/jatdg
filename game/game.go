@@ -11,6 +11,7 @@ import (
 	"github.com/LokiTheMango/jatdg/game/pathing"
 	"github.com/LokiTheMango/jatdg/game/render"
 	"github.com/LokiTheMango/jatdg/game/tiles"
+	"github.com/LokiTheMango/jatdg/game/ui"
 )
 
 // Game Object
@@ -19,6 +20,7 @@ type Game struct {
 	screen         Screen
 	level          level.Level
 	input          input.Keyboard
+	UIManager      ui.UIManager
 	DrawRequested  bool
 	Goals          map[int]entities.Entity
 	Towers         map[int]entities.Entity
@@ -49,6 +51,7 @@ func (game *Game) Init(filePath string) {
 	game.screen = NewScreen(filePath + "tiles.png")
 	level, towerTiles, spawnTiles, goalTiles := level.NewLevel(game.screen.SpriteSheet, filePath+"level.png")
 	game.level = level
+	game.initUI(filePath)
 	game.screen.SetLevel(&game.level)
 	game.camera = entities.NewCamera(&game.level, 1)
 	game.createGoalEntities(goalTiles)
@@ -56,6 +59,13 @@ func (game *Game) Init(filePath string) {
 	game.createSpawnerEntities(spawnTiles)
 	game.Enemies = make(map[int]entities.Mob)
 	game.Projectiles = make(map[int]entities.Mob)
+}
+
+func (game *Game) initUI(filePath string) {
+	game.UIManager = ui.NewUIManager(filePath + "font.png")
+	panel := ui.NewUIPanel(pathing.NewVector2i(260, 0))
+	game.UIManager.AddPanel(panel)
+	game.UIManager.AddNewUITextTo(0, 0, 0, "ABC")
 }
 
 func (game *Game) createGoalEntities(tiles []*tiles.Tile) {
@@ -110,20 +120,12 @@ func (game *Game) Update() {
 	game.removeDeadObjects()
 	game.clearScreen()
 	game.render()
-	for _, enemy := range game.Enemies {
-		tile := *enemy.GetTile()
-		game.screen.RenderMob(enemy.GetX(), enemy.GetY(), tile)
-	}
-	for _, projectile := range game.Projectiles {
-		tile := *projectile.GetTile()
-		game.screen.RenderMob(projectile.GetX(), projectile.GetY(), tile)
-	}
 }
 
 func (game *Game) checkGoalHit() {
 	for _, goal := range game.Goals {
-		x := float64(goal.GetX()/4 + enums.HEIGHT_TILE/2)
-		y := float64(goal.GetY() + enums.HEIGHT_TILE/2)
+		x := float64(goal.GetX()<<5 + enums.HEIGHT_TILE/2)
+		y := float64(goal.GetY()<<5 + enums.HEIGHT_TILE/2)
 		for _, enemy := range game.Enemies {
 			xa := float64(enemy.GetX()/4 + enums.HEIGHT_TILE/2)
 			ya := float64(enemy.GetY() + enums.HEIGHT_TILE/2)
@@ -131,6 +133,8 @@ func (game *Game) checkGoalHit() {
 			check := math.Abs(x-xa) <= 10 && math.Abs(y-ya) <= 10
 			if check {
 				game.lives--
+				enemy.Hit(100)
+				game.numEnemies--
 				fmt.Println("GOAL HIT !!! LIVE DOWN")
 				fmt.Println(game.lives)
 			}
@@ -170,6 +174,15 @@ func (game *Game) render() {
 	x := game.camera.GetX()
 	y := game.camera.GetY()
 	game.screen.RenderLevel(x, y)
+	for _, enemy := range game.Enemies {
+		tile := *enemy.GetTile()
+		game.screen.RenderMob(enemy.GetX(), enemy.GetY(), tile)
+	}
+	for _, projectile := range game.Projectiles {
+		tile := *projectile.GetTile()
+		game.screen.RenderMob(projectile.GetX(), projectile.GetY(), tile)
+	}
+	game.screen.RenderUI(&game.UIManager)
 }
 
 func (game *Game) clearScreen() {
@@ -209,10 +222,10 @@ func (game *Game) moveWithCollisionCheck() {
 		if update {
 			game.updateEnemyPath(enemy)
 		}
-		x := int((float64(enemy.GetX()) / 128))
-		x2 := int((float64(enemy.GetX()+127) / 128))
-		y := (int((float64(enemy.GetY()) / 32))) * game.level.Width
-		y2 := (int((float64(enemy.GetY()+31) / 32))) * game.level.Width
+		x := int((float64(enemy.GetX()+24) / 128))
+		x2 := int((float64(enemy.GetX()+123) / 128))
+		y := (int((float64(enemy.GetY()+6) / 32))) * game.level.Width
+		y2 := (int((float64(enemy.GetY()+25) / 32))) * game.level.Width
 		if !game.collisionCheckForTile(x, x2, y, y2) {
 			enemy.Move(0, 0)
 		}
