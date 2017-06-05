@@ -65,7 +65,9 @@ func (game *Game) initUI(filePath string) {
 	game.UIManager = ui.NewUIManager(filePath + "font.png")
 	panel := ui.NewUIPanel(pathing.NewVector2i(260, 0))
 	game.UIManager.AddPanel(panel)
-	game.UIManager.AddNewUITextTo(0, 0, 0, "ABC")
+	game.UIManager.AddNewUILabelTo(0, 260, 20, "HP")
+	game.UIManager.AddNewUILabelTo(0, 260, 50, "CASH")
+	game.UIManager.AddNewUILabelTo(0, 260, 80, "TOW")
 }
 
 func (game *Game) createGoalEntities(tiles []*tiles.Tile) {
@@ -120,6 +122,7 @@ func (game *Game) Update() {
 	game.removeDeadObjects()
 	game.clearScreen()
 	game.render()
+	game.screen.RenderUI(&game.UIManager)
 }
 
 func (game *Game) checkGoalHit() {
@@ -182,7 +185,6 @@ func (game *Game) render() {
 		tile := *projectile.GetTile()
 		game.screen.RenderMob(projectile.GetX(), projectile.GetY(), tile)
 	}
-	game.screen.RenderUI(&game.UIManager)
 }
 
 func (game *Game) clearScreen() {

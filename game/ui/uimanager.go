@@ -25,12 +25,12 @@ func (ui *UIManager) AddPanel(panel UIPanel) {
 	ui.Panels = append(ui.Panels, panel)
 }
 
-func (ui *UIManager) AddNewUITextTo(panelIndex int, x int, y int, str string) {
+func (ui *UIManager) AddNewUILabelTo(panelIndex int, x int, y int, str string) {
 	if &ui.Panels[panelIndex] != nil {
 		pos := pathing.NewVector2i(x, y)
 		offs := pathing.NewVector2i(0, 0)
 		font := font.StringToCharArr(ui.FontSheet, str)
-		comp := NewUIText(pos, offs, font, str)
+		comp := NewUILabel(str, font, pos, offs)
 		ui.Panels[panelIndex].Components = append(ui.Panels[panelIndex].Components, comp)
 	}
 }

@@ -1,20 +1,23 @@
 package ui
 
 import (
+	"github.com/LokiTheMango/jatdg/game/font"
 	"github.com/LokiTheMango/jatdg/game/pathing"
 )
 
 type UILabel struct {
-	text             string
+	font             []font.Character
+	label            string
 	position, offset pathing.Vector2i
 	pixelArray       []byte
 }
 
-func NewUILabel(pixelArray []byte, text string, position pathing.Vector2i) UIComponent {
+func NewUILabel(label string, font []font.Character, position, offset pathing.Vector2i) UIComponent {
 	return &UILabel{
-		text:       text,
-		position:   position,
-		pixelArray: pixelArray,
+		label:    label,
+		font:     font,
+		position: position,
+		offset:   offset,
 	}
 }
 
@@ -31,11 +34,15 @@ func (label *UILabel) GetBackgroundColor() []byte {
 }
 
 func (label *UILabel) GetLabel() string {
-	return label.text
+	return label.label
 }
 
 func (label *UILabel) GetPixelArray() []byte {
-	return nil
+	pix := make([]byte, 16*4*16*len(label.font))
+	for i, char := range label.font {
+		copy(pix[i*16*4*16:(i+1)*16*4*16], char.GetPixelArray())
+	}
+	return pix
 }
 
 func (label *UILabel) GetPosition() pathing.Vector2i {

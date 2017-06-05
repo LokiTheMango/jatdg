@@ -238,13 +238,51 @@ func (screen *Screen) RenderSprite(xp int, yp int, sprite render.Sprite, fixed b
 	}
 }
 
+func (screen *Screen) RenderCharacters(xp int, yp int, len int, pixel []byte, fixed bool) {
+	xp = xp << 2
+	if fixed {
+		xp -= screen.xOffset
+		yp -= screen.yOffset
+	}
+	invisPix := []byte{255, 0, 255, 255}
+	for i := 0; i < len; i++ {
+		for y := 0; y < 16; y++ {
+			ya := y + yp
+			for x := 0; x < 16; x++ {
+				xa := x*4 + xp
+				if xa < (-1*16*4) || xa >= enums.WIDTH || ya < 0 || ya >= enums.HEIGHT {
+					break
+				}
+				if xa < 0 {
+					xa = 0
+				}
+				indexPix := xa + ya*enums.WIDTH + i*16*4
+				indexTilePix := x*4 + y*16*4 + i*16*4*16
+				tilePixelCheck := pixel[indexTilePix : indexTilePix+4]
+				if !testEq(tilePixelCheck, invisPix) {
+					for i := 0; i < 4; i++ {
+						screen.PixelArray[indexPix+i] = pixel[indexTilePix+i]
+					}
+				}
+			}
+		}
+	}
+}
+
 func (screen *Screen) RenderUI(ui *ui.UIManager) {
 	for _, panel := range ui.Panels {
 		posX, posY := panel.GetPositionXY()
 		screen.RenderSprite(posX, posY, panel.Sprite, false)
 		for _, component := range panel.Components {
-			component.GetLabel()
+			vec := component.GetPosition()
+			x, y := vec.GetXY()
+			label := component.GetLabel()
+			PixArr := component.GetPixelArray()
+			if &label != nil {
+				length := len(label)
+				screen.RenderCharacters(x, y, length, PixArr, false)
+			}
 		}
 	}
-	screen.DrawRect(250, 50, 20, 20, []byte{255, 0, 255, 255}, false)
+	screen.DrawRect(260, 1, 59, 318, []byte{40, 40, 40, 255}, false)
 }

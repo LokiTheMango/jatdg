@@ -19,7 +19,7 @@ func main() {
 		panic(err)
 	}
 	fmt.Println(dir)
-	fmt.Println([]rune("Z")[0])
+	fmt.Println([]rune("a")[0])
 	exPath := path.Dir(dir)
 	fmt.Println(exPath)
 	game := game.New()
@@ -38,6 +38,11 @@ func startGame(window *graphics.Window, gameI *game.Game, filePath string) {
 		if time.Now().Sub(lastVBlankTime) > time.Millisecond*8 {
 			gameI.DrawRequested = true
 			gameI.Update()
+			if window.StopDrawing {
+				toWait := 8 * time.Millisecond
+				<-time.NewTimer(toWait).C
+				lastVBlankTime = time.Now()
+			}
 		}
 		if gameI.DrawRequested && !window.StopDrawing {
 			window.Mutex.Lock()
