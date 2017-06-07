@@ -65,9 +65,9 @@ func (game *Game) initUI(filePath string) {
 	game.UIManager = ui.NewUIManager(filePath + "font.png")
 	panel := ui.NewUIPanel(pathing.NewVector2i(260, 0))
 	game.UIManager.AddPanel(panel)
-	game.UIManager.AddNewUILabelTo(0, 260, 20, "HP")
-	game.UIManager.AddNewUILabelTo(0, 260, 50, "CASH")
-	game.UIManager.AddNewUILabelTo(0, 260, 80, "TOW")
+	game.UIManager.AddNewUILabelTo(0, 260, 0, "sprite.HP", render.NewSprite(game.screen.SpriteSheet.PixelArray, enums.VOID, 0, 1), true)
+	game.UIManager.AddNewUILabelTo(0, 260, 30, "sprite CASH", render.NewSprite(game.screen.SpriteSheet.PixelArray, enums.VOID, 1, 1), true)
+	game.UIManager.AddNewUILabelTo(0, 260, 60, "TOW", render.Sprite{}, false)
 }
 
 func (game *Game) createGoalEntities(tiles []*tiles.Tile) {

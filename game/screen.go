@@ -1,6 +1,8 @@
 package game
 
 import (
+	"strings"
+
 	"github.com/LokiTheMango/jatdg/enums"
 	"github.com/LokiTheMango/jatdg/game/level"
 	"github.com/LokiTheMango/jatdg/game/render"
@@ -221,19 +223,25 @@ func (screen *Screen) RenderSprite(xp int, yp int, sprite render.Sprite, fixed b
 	spritePix := sprite.PixelArray
 	height := sprite.Height
 	width := sprite.Width
+	invisPix := []byte{255, 0, 255, 255}
 	for y := 0; y < height; y++ {
 		ya := y + yp
-		for x := 0; x < width*4; x++ {
-			xa := x + xp
-			if xa < (-1*width) || xa >= enums.WIDTH || ya < 0 || ya >= enums.HEIGHT {
+		for x := 0; x < width; x++ {
+			xa := x*4 + xp
+			if xa < (-1*width*4) || xa >= enums.WIDTH || ya < 0 || ya >= enums.HEIGHT {
 				break
 			}
 			if xa < 0 {
 				xa = 0
 			}
 			indexPix := xa + ya*enums.WIDTH
-			indexSpritePix := x + y*width
-			screen.PixelArray[indexPix] = spritePix[indexSpritePix]
+			indexSpritePix := x*4 + y*width*4
+			spritePixelCheck := spritePix[indexSpritePix : indexSpritePix+4]
+			if !testEq(spritePixelCheck, invisPix) {
+				for i := 0; i < 4; i++ {
+					screen.PixelArray[indexPix+i] = spritePix[indexSpritePix+i]
+				}
+			}
 		}
 	}
 }
@@ -269,8 +277,8 @@ func (screen *Screen) RenderCharacters(xp int, yp int, len int, pixel []byte, fi
 	}
 }
 
-func (screen *Screen) RenderUI(ui *ui.UIManager) {
-	for _, panel := range ui.Panels {
+func (screen *Screen) RenderUI(uim *ui.UIManager) {
+	for _, panel := range uim.Panels {
 		posX, posY := panel.GetPositionXY()
 		screen.RenderSprite(posX, posY, panel.Sprite, false)
 		for _, component := range panel.Components {
@@ -279,8 +287,17 @@ func (screen *Screen) RenderUI(ui *ui.UIManager) {
 			label := component.GetLabel()
 			PixArr := component.GetPixelArray()
 			if &label != nil {
-				length := len(label)
-				screen.RenderCharacters(x, y, length, PixArr, false)
+				if !strings.Contains(label, "sprite") {
+					length := len(label)
+					screen.RenderCharacters(x, y, length, PixArr, false)
+				} else {
+					sprite := render.Sprite{
+						PixelArray: PixArr,
+						Height:     enums.HEIGHT_TILE,
+						Width:      enums.HEIGHT_TILE,
+					}
+					screen.RenderSprite(x, y, sprite, false)
+				}
 			}
 		}
 	}

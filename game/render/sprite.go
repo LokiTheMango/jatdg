@@ -35,7 +35,7 @@ func NewColorSprite(width int, height int, color []byte) Sprite {
 	pixel := make([]byte, width*4*height)
 	for i := 0; i < height; i++ {
 		for j := 0; j < width*4; j += 4 {
-			start := j + i*width
+			start := j + i*width*4
 			end := start + 4
 			copy(pixel[start:end], color)
 		}
